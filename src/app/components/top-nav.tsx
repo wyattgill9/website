@@ -11,7 +11,7 @@ export const LINKS = [
     { label: "fish", href: "/" },
     { label: "projects", href: "/projects" },
     { label: "shelf", href: "/shelf" },
-    { label: "blog", href: "/blog" },
+    // { label: "blog", href: "/blog" },
 ];
 
 const ITEM = "transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 outline-none";
