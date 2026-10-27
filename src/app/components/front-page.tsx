@@ -26,6 +26,16 @@ const QuoteLines = () => (
     </>
 );
 
+// The pond and the layout started as Dao Ho's portfolio.
+const Credit = ({ className }: { className?: string }) => (
+    <p className={`text-[12px] opacity-40 ${className ?? ""}`}>
+        based on{" "}
+        <a href="https://daoho.dev" target="_blank" rel="noopener noreferrer" className={UNDERLINE}>
+            daoho.dev
+        </a>
+    </p>
+);
+
 const Socials = ({ className }: { className?: string }) => (
     <p className={className}>
         {SOCIALS.map(({ label, href }, i) => (
@@ -86,6 +96,7 @@ const desktopPage = () => {
                     Favorite paper: <Cited source="raft">Raft</Cited>. More on my <Cited source="shelf">shelf</Cited>.
                 </p>
                 <Socials className="mt-[1.5vh]" />
+                <Credit className="mt-[1vh]" />
             </motion.div>
         </Container>
     );
@@ -134,6 +145,7 @@ const mobilePage = () => {
                     Favorite paper: <MobileLink source="raft">Raft</MobileLink>.
                 </p>
                 <Socials className="mt-2" />
+                <Credit className="mt-1" />
             </motion.div>
         </Container>
     );
