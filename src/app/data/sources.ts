@@ -56,22 +56,6 @@ export const SOURCES: Record<string, Source> = {
         summary: "My whole machine, declared in one repo.",
         href: "https://github.com/wyattgill9/nix-config",
     },
-    helix: {
-        key: "helix",
-        name: "Helix",
-        role: "Editor",
-        dates: "Setup",
-        summary: "Modal editing, batteries included.",
-        href: "https://github.com/helix-editor/helix",
-    },
-    tmux: {
-        key: "tmux",
-        name: "tmux",
-        role: "Terminal multiplexer",
-        dates: "Setup",
-        summary: "Everything lives in a session.",
-        href: "https://github.com/tmux/tmux",
-    },
     raft: {
         key: "raft",
         name: "Raft",

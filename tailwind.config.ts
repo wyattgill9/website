@@ -45,8 +45,6 @@ export default {
                 "accordion-up": "accordion-up 0.2s ease-out",
             },
             fontFamily: {
-                inter: "var(--font-inter)",
-                playfairDisplay: "var(--font-playfair-display)",
                 geistMono: "var(--font-geist-mono)",
                 geistSans: "var(--font-geist-sans)",
             },

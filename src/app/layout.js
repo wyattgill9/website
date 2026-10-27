@@ -1,21 +1,9 @@
-import { Inter, Playfair_Display } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { ThemeProvider } from "next-themes";
 import { GlobalProvider } from "../context-providers/global-provider";
 import { PostHogInitializer } from "../context-providers/posthog-initializer";
-
-const inter = Inter({
-    subsets: ["latin"],
-    variable: "--font-inter",
-});
-
-const fontPlayfairDisplay = Playfair_Display({
-    subsets: ["latin"],
-    variable: "--font-playfair-display",
-    weight: "400",
-});
 
 const fontGeistSans = localFont({
     src: [
@@ -43,7 +31,7 @@ export default function RootLayout({ children }) {
         // next-themes sets the theme class on <html> before React hydrates, which React would otherwise flag.
         <html lang="en" suppressHydrationWarning>
             <body
-                className={`${inter.variable} ${fontPlayfairDisplay.variable} ${fontGeistMono.variable} ${fontGeistSans.variable} scroll-smooth overflow-x-clip bg-background text-foreground`}
+                className={`${fontGeistMono.variable} ${fontGeistSans.variable} scroll-smooth overflow-x-clip bg-background text-foreground`}
             >
                 <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} storageKey="theme">
                     <PostHogInitializer>

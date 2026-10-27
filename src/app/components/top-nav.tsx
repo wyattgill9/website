@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
+import Container from "./container";
 import ThemeIcon from "./theme-icon";
 
-const LINKS = [
-    { label: "pond", href: "/" },
+// tmux windows: the home page is ~.
+export const LINKS = [
+    { label: "~", href: "/" },
     { label: "projects", href: "/projects" },
     { label: "shelf", href: "/shelf" },
     { label: "blog", href: "/blog" },
@@ -14,6 +16,7 @@ const LINKS = [
 
 const ITEM = "transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 outline-none";
 
+/** A tmux status line: session name, numbered windows with `*` on the current one, theme toggle on the right. */
 export default function TopNav() {
     const pathname = usePathname();
     const { resolvedTheme, setTheme } = useTheme();
@@ -21,23 +24,29 @@ export default function TopNav() {
     const active = (href: string) => pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 
     return (
-        <nav
+        <Container
+            as="nav"
             data-koi-avoid
             aria-label="Main"
-            className="fixed inset-x-0 top-0 z-30 flex items-center justify-center gap-8 pt-8 font-geistMono text-[13px] lowercase text-foreground transition-colors duration-200"
+            className="fixed inset-x-0 top-0 z-30 flex items-center gap-6 pt-8 font-geistMono text-[13px] lowercase text-foreground transition-colors duration-200"
         >
-            {LINKS.map(({ label, href }) => (
+            <span className="opacity-50">[wyatt]</span>
+            {LINKS.map(({ label, href }, i) => (
                 <Link
                     key={href}
                     href={href}
                     aria-current={active(href) ? "page" : undefined}
                     className={`${ITEM} ${active(href) ? "opacity-100" : "opacity-50"}`}
                 >
+                    <span className="opacity-60">{i}:</span>
                     {label}
+                    <span aria-hidden="true" className={active(href) ? "" : "invisible"}>
+                        *
+                    </span>
                 </Link>
             ))}
             {/* A margin of dead space around the toggle, so a near miss doesn't drop food in the pond behind it. */}
-            <span data-koi-ignore className="-m-4 flex p-4">
+            <span data-koi-ignore className="-m-4 ml-auto flex p-4">
                 <button
                     type="button"
                     onClick={() => setTheme(resolvedTheme === "light" ? "dark" : "light")}
@@ -47,6 +56,6 @@ export default function TopNav() {
                     <ThemeIcon size={15} />
                 </button>
             </span>
-        </nav>
+        </Container>
     );
 }

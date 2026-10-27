@@ -6,13 +6,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { ExternalLink, Github } from "lucide-react";
 import ThemeIcon from "./theme-icon";
-
-const navLinks = [
-    { label: "Home", href: "/" },
-    { label: "Projects", href: "/projects" },
-    { label: "Shelf", href: "/shelf" },
-    { label: "Blog", href: "/blog" },
-];
+import { LINKS } from "./top-nav";
 
 const secondaryLinks = [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/wyatt-gill-17380b323/" },
@@ -38,8 +32,8 @@ export default function MobileNav() {
                     className="w-full flex items-center justify-between px-[5vw] py-[3.5vw] rounded-full cursor-pointer"
                     style={{ background: pillBg, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
                 >
-                    <span className="font-inter font-normal text-20 tracking-normal" style={{ color: fg }}>
-                        Wyatt Gill
+                    <span className="font-geistMono text-[4vw]" style={{ color: fg }}>
+                        [wyatt]
                     </span>
                     <div className="relative" style={{ width: "5vw", height: "5vw" }}>
                         <AnimatePresence mode="wait">
@@ -83,7 +77,7 @@ export default function MobileNav() {
                         style={{ backgroundColor: bg }}
                     >
                         <div className="flex-1 flex flex-col items-center justify-center gap-[0.5vh]">
-                            {navLinks.map((link, i) => (
+                            {LINKS.map((link, i) => (
                                 <motion.div
                                     key={link.href}
                                     initial={{ opacity: 0, y: 16 }}
@@ -93,9 +87,10 @@ export default function MobileNav() {
                                     <Link
                                         href={link.href}
                                         onClick={() => setOpen(false)}
-                                        className="font-playfairDisplay font-bold text-[14vw] leading-[17vw] block text-center"
+                                        className="font-geistMono text-[10vw] leading-[15vw] block text-center lowercase"
                                         style={{ color: fg }}
                                     >
+                                        <span style={{ color: fgDim }}>{i}:</span>
                                         {link.label}
                                     </Link>
                                 </motion.div>
@@ -109,7 +104,7 @@ export default function MobileNav() {
                                     href={link.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="font-inter text-[3.5vw] tracking-wide flex items-center gap-[1.5vw]"
+                                    className="font-geistMono text-[3.5vw] lowercase flex items-center gap-[1.5vw]"
                                     style={{ color: fgDim }}
                                 >
                                     {link.label}

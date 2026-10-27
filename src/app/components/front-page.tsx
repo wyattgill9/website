@@ -18,13 +18,9 @@ const UNDERLINE =
 
 const QuoteLines = () => (
     <>
-        low-level programming · hpc
+        the carp that clears the gate
         <br />
-        λx.x
-        <span
-            aria-hidden="true"
-            className="ml-1 inline-block h-[1em] w-[0.55em] translate-y-[0.15em] animate-blink bg-foreground motion-reduce:animate-none"
-        />
+        becomes a dragon
     </>
 );
 
@@ -32,7 +28,7 @@ const Socials = ({ className }: { className?: string }) => (
     <p className={className}>
         {SOCIALS.map(({ label, href }, i) => (
             <span key={label}>
-                {i > 0 && <span className="opacity-40"> / </span>}
+                {i > 0 && <span className="opacity-40"> · </span>}
                 <a
                     href={href}
                     target="_blank"
@@ -63,7 +59,7 @@ const desktopPage = ({ stats }: { stats: PondStats }) => {
                 <div
                     data-koi-avoid
                     aria-hidden="true"
-                    className="absolute right-6 top-8 font-geistMono text-[11px] leading-relaxed tabular-nums lg:right-[20vw]"
+                    className="absolute right-6 top-20 font-geistMono text-[11px] leading-relaxed tabular-nums lg:right-[20vw]"
                 >
                     <div className="opacity-[0.32]">{stats.koi}</div>
                     {/* The pellet count flashes each time it changes, tying a click or a bite to the number. */}
@@ -93,14 +89,13 @@ const desktopPage = ({ stats }: { stats: PondStats }) => {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3, delay: 0.2 }}
             >
-                <h1>你好, I&apos;m Wyatt.</h1>
+                <h1>Wyatt Gill.</h1>
                 <p>
-                    Systems engineer in San Francisco. Previously @ <Cited source="ix">ix.dev</Cited>.
+                    Systems engineer in San Francisco, most recently @ <Cited source="ix">ix.dev</Cited>.
                 </p>
                 <p>
-                    Writing <Cited source="rust">Rust</Cited> and <Cited source="cpp">C++</Cited> on{" "}
-                    <Cited source="nixos">NixOS</Cited>, in <Cited source="helix">Helix</Cited> +{" "}
-                    <Cited source="tmux">tmux</Cited>.
+                    I make builds incremental and runtimes fast, in <Cited source="rust">Rust</Cited>,{" "}
+                    <Cited source="cpp">C++</Cited> and <Cited source="nixos">Nix</Cited>.
                 </p>
                 <p>
                     Favorite paper: <Cited source="raft">Raft</Cited>. More on my <Cited source="shelf">shelf</Cited>.
@@ -141,13 +136,13 @@ const mobilePage = () => {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3, delay: 0.2 }}
             >
-                <h1>你好, I&apos;m Wyatt.</h1>
+                <h1>Wyatt Gill.</h1>
                 <p>
-                    Systems engineer in San Francisco. Previously @ <MobileLink source="ix">ix.dev</MobileLink>.
+                    Systems engineer in San Francisco, most recently @ <MobileLink source="ix">ix.dev</MobileLink>.
                 </p>
                 <p>
-                    Writing <MobileLink source="rust">Rust</MobileLink> and <MobileLink source="cpp">C++</MobileLink> on{" "}
-                    <MobileLink source="nixos">NixOS</MobileLink>.
+                    I make builds incremental and runtimes fast, in <MobileLink source="rust">Rust</MobileLink>,{" "}
+                    <MobileLink source="cpp">C++</MobileLink> and <MobileLink source="nixos">Nix</MobileLink>.
                 </p>
                 <p>
                     Favorite paper: <MobileLink source="raft">Raft</MobileLink>.
