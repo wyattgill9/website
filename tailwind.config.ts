@@ -26,7 +26,6 @@ export default {
             },
             fontFamily: {
                 inter: "var(--font-inter)",
-                playfairDisplay: "var(--font-playfair-display)",
                 geistMono: "var(--font-geist-mono)",
                 geistSans: "var(--font-geist-sans)",
             },

@@ -5,12 +5,16 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import ThemeIcon from "./theme-icon";
 
-const LINKS = [
+export const LINKS = [
     { label: "pond", href: "/" },
     { label: "projects", href: "/projects" },
     { label: "gallery", href: "/gallery" },
     { label: "blog", href: "/blog" },
 ];
+
+// A project's own page still counts as being in projects.
+export const isActive = (pathname: string, href: string) =>
+    pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 
 const ITEM = "transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 outline-none";
 
@@ -22,8 +26,7 @@ type TopNavProps = {
 export default function TopNav({ overCover = false }: TopNavProps) {
     const pathname = usePathname();
     const { resolvedTheme, setTheme } = useTheme();
-    // A project's own page still counts as being in projects.
-    const active = (href: string) => pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+    const active = (href: string) => isActive(pathname, href);
 
     return (
         <nav

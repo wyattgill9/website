@@ -26,7 +26,7 @@ const QuoteLines = () => (
     </>
 );
 
-const Socials = ({ className }: { className?: string }) => (
+export const Socials = ({ className }: { className?: string }) => (
     <p className={className}>
         {SOCIALS.map(({ label, href }, i) => (
             <span key={label}>
