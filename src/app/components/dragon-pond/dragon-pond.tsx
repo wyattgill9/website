@@ -1,22 +1,20 @@
 "use client";
 
-import { useEffect, useEffectEvent, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import posthog from "posthog-js";
 import { cn } from "../../../lib/utils";
-import { KoiRenderer } from "./renderer";
+import { DragonRenderer } from "./renderer";
 import { World, type Box } from "./world";
-
-export type PondStats = { koi: number; pellets: number };
 
 const STEP = 1 / 60;
 const MAX_STEPS = 4;
-const INTERACTIVE = "a, button, input, textarea, select, label, [role='button'], [data-koi-ignore]";
-// Content over the pond carries this attribute; koi steer around it and fade beneath it.
-const AVOID_TARGETS = "[data-koi-avoid]";
+const INTERACTIVE = "a, button, input, textarea, select, label, [role='button'], [data-dragon-ignore]";
+// Content over the pond carries this attribute; dragons steer around it and fade beneath it.
+const AVOID_TARGETS = "[data-dragon-avoid]";
 // Re-measure the content boxes this often, in frames, to follow layout shifts and entrance animations.
 const MEASURE_EVERY_FRAMES = 30;
-// Content boxes closer than this merge, so koi aren't squeezed into the slot between them.
+// Content boxes closer than this merge, so dragons aren't squeezed into the slot between them.
 const MERGE_GAP_PX = 160;
 
 function mergeNearby(boxes: Box[]) {
@@ -38,13 +36,12 @@ function mergeNearby(boxes: Box[]) {
 
 class PondEngine {
     private world = new World();
-    private renderer: KoiRenderer;
+    private renderer: DragonRenderer;
     private raf = 0;
     private last = 0;
     private acc = 0;
     private frames = 0;
     private lastPointerTime = 0;
-    private reported: PondStats = { koi: -1, pellets: -1 };
     private visible = true;
     private disposed = false;
     private reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -54,11 +51,8 @@ class PondEngine {
         this.schedule();
     });
 
-    constructor(
-        private canvas: HTMLCanvasElement,
-        private onStats: (stats: PondStats) => void
-    ) {
-        this.renderer = new KoiRenderer(canvas);
+    constructor(private canvas: HTMLCanvasElement) {
+        this.renderer = new DragonRenderer(canvas);
         this.resizeObserver.observe(canvas);
         this.intersectionObserver.observe(canvas);
         this.reducedMotion.addEventListener("change", this.schedule);
@@ -93,17 +87,7 @@ class PondEngine {
         this.renderer.resize(rect.width, rect.height, Math.min(window.devicePixelRatio || 1, 2));
         this.world.resize(rect.width, rect.height);
         this.measureContent();
-        this.report();
         if (this.reducedMotion.matches) this.drawStill();
-    }
-
-    // Only call back when a count changes, so the page doesn't re-render every frame.
-    private report() {
-        const koi = this.world.koi.length;
-        const pellets = this.world.pellets.length;
-        if (koi === this.reported.koi && pellets === this.reported.pellets) return;
-        this.reported = { koi, pellets };
-        this.onStats(this.reported);
     }
 
     private schedule = () => {
@@ -146,18 +130,16 @@ class PondEngine {
         if (steps === MAX_STEPS) this.acc = 0;
         if (++this.frames % MEASURE_EVERY_FRAMES === 0) this.measureContent();
         this.renderer.render(this.world, dt);
-        this.report();
         this.raf = requestAnimationFrame(this.frame);
     };
 
-    // Reduced motion: let the koi spread out, then hold a single frame.
+    // Reduced motion: let the dragons spread out, then hold a single frame.
     private drawStill() {
         if (this.world.time < 4) {
             for (let i = 0; i < 240; i++) this.world.step(STEP);
         }
         this.measureContent();
         this.renderer.render(this.world, STEP);
-        this.report();
     }
 
     private toLocal(e: MouseEvent) {
@@ -190,7 +172,6 @@ class PondEngine {
         if (!inside) return;
         this.world.feed(x, y);
         posthog.capture("koi_pond_fed", { pellet_count: this.world.pellets.length });
-        this.report();
     };
 
     private onPointerLeave = () => {
@@ -199,19 +180,15 @@ class PondEngine {
     };
 }
 
-type KoiPondProps = { className?: string; onStats?: (stats: PondStats) => void };
-
-export default function KoiPond({ className, onStats }: KoiPondProps) {
+export default function DragonPond({ className }: { className?: string }) {
     const isLight = useTheme().resolvedTheme === "light";
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const engineRef = useRef<PondEngine | null>(null);
-    // An Effect Event, so a new callback doesn't tear down the engine.
-    const emitStats = useEffectEvent((stats: PondStats) => onStats?.(stats));
 
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-        const engine = new PondEngine(canvas, (stats) => emitStats(stats));
+        const engine = new PondEngine(canvas);
         engineRef.current = engine;
         return () => {
             engine.destroy();

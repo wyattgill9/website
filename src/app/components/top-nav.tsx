@@ -6,9 +6,9 @@ import { useTheme } from "next-themes";
 import Container from "./container";
 import ThemeIcon from "./theme-icon";
 
-// tmux windows: the home page is ~.
+// tmux windows: the home page is the shell, fish.
 export const LINKS = [
-    { label: "~", href: "/" },
+    { label: "fish", href: "/" },
     { label: "projects", href: "/projects" },
     { label: "shelf", href: "/shelf" },
     { label: "blog", href: "/blog" },
@@ -26,7 +26,7 @@ export default function TopNav() {
     return (
         <Container
             as="nav"
-            data-koi-avoid
+            data-dragon-avoid
             aria-label="Main"
             className="fixed inset-x-0 top-0 z-30 flex items-center gap-6 pt-8 font-geistMono text-[13px] lowercase text-foreground transition-colors duration-200"
         >
@@ -46,7 +46,7 @@ export default function TopNav() {
                 </Link>
             ))}
             {/* A margin of dead space around the toggle, so a near miss doesn't drop food in the pond behind it. */}
-            <span data-koi-ignore className="-m-4 ml-auto flex p-4">
+            <span data-dragon-ignore className="-m-4 ml-auto flex p-4">
                 <button
                     type="button"
                     onClick={() => setTheme(resolvedTheme === "light" ? "dark" : "light")}

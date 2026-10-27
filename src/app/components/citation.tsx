@@ -135,7 +135,7 @@ const Cited = ({ source, children }: { source: string; children: React.ReactNode
                         exit={{ opacity: 0, y: 2, scale: 0.99, transition: { duration: 0.08, ease: "easeIn" } }}
                         transition={{ duration: 0.12, ease: "easeOut" }}
                         onClick={members ? undefined : activate}
-                        data-koi-ignore
+                        data-dragon-ignore
                         className="absolute bottom-full left-0 z-50 mb-[10px] flex origin-bottom-left flex-col overflow-hidden rounded-[8px] cursor-pointer font-geistMono text-foreground"
                         style={{
                             width: CARD_W,

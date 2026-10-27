@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import Container from "../components/container";
-import InlineMd, { LINK } from "../components/inline-md";
+import InlineMd from "../components/inline-md";
 import SiteNav from "../components/site-nav";
 import { GENERATED } from "./sync";
 
@@ -59,24 +59,25 @@ const CURRENTLY: [string, string[]][] = [
     ["Playing", ["NieR: Automata"]],
 ];
 
-const FAVORITES: { label: string; profile?: [string, string]; items: string[]; ranked?: boolean }[] = [
-    { label: "Book", items: ["The Wind-Up Bird Chronicle", "Slaughterhouse-Five"], ranked: true },
+const FAVORITES: { label: string; profile?: [string, string]; items: string[] }[] = [
+    { label: "Book", items: ["The Wind-Up Bird Chronicle", "Slaughterhouse-Five"] },
     { label: "Manga", items: ["Tokyo Ghoul"] },
     {
         label: "Anime",
         profile: ["myanimelist", "https://myanimelist.net/profile/raiinyzen"],
         items: ["Fate series", "86", "Re:Zero", "Violet Evergarden", "Darling in the Franxx"],
-        ranked: true,
     },
     {
         label: "Film",
         profile: ["letterboxd", "https://letterboxd.com/Wyatt_G/"],
         items: ["Inception", "Whiplash", "Inglourious Basterds", "Weathering with You"],
-        ranked: true,
     },
     { label: "TV", items: ["Chernobyl"] },
     { label: "Game", items: ["NieR: Automata"] },
 ];
+
+// A fixed label column shared by both sections, so their values line up.
+const ROWS = "grid grid-cols-[5.5rem_minmax(0,1fr)] gap-y-2";
 
 const Label = ({ children }: { children: ReactNode }) => (
     <h2 className="mb-3 text-[12px] lowercase tracking-[0.04em] opacity-50">{children}</h2>
@@ -91,45 +92,50 @@ export default async function Shelf() {
             <Container as="main" className="pb-24 pt-28 font-geistMono text-[14px] leading-[1.7]">
                 <h1 className="mb-12 text-[15px]">Shelf</h1>
                 <div className="flex flex-col gap-14 lg:flex-row lg:gap-16">
-                    <aside className="flex shrink-0 flex-col gap-10 lg:w-64">
+                    {/* Pinned while the lists scroll; scrolls itself only if the window is too short to hold it. */}
+                    <aside className="flex shrink-0 flex-col gap-10 lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:w-80 lg:self-start lg:overflow-y-auto">
                         <section>
                             <Label>currently</Label>
-                            <dl className="flex flex-col gap-3">
+                            <dl className={ROWS}>
                                 {CURRENTLY.map(([label, items]) => (
-                                    <div key={label}>
+                                    <Fragment key={label}>
                                         <dt className="opacity-50">{label}</dt>
-                                        {items.map((title) => (
-                                            <dd key={title}>{title}</dd>
-                                        ))}
-                                    </div>
+                                        <dd>
+                                            {items.map((title) => (
+                                                <div key={title}>{title}</div>
+                                            ))}
+                                        </dd>
+                                    </Fragment>
                                 ))}
                             </dl>
                         </section>
                         <section>
                             <Label>favorites</Label>
-                            <dl className="flex flex-col gap-3">
-                                {FAVORITES.map(({ label, profile, items, ranked }) => (
-                                    <div key={label}>
+                            {/* Best first; a label with a profile links to it. */}
+                            <dl className={ROWS}>
+                                {FAVORITES.map(({ label, profile, items }) => (
+                                    <Fragment key={label}>
                                         <dt className="opacity-50">
-                                            {label}
-                                            {profile && (
+                                            {profile ? (
                                                 <a
                                                     href={profile[1]}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className={`${LINK} ml-2 text-[12px]`}
+                                                    title={profile[0]}
+                                                    className="underline-offset-[5px] hover:underline"
                                                 >
-                                                    {profile[0]}
+                                                    {label}
                                                 </a>
+                                            ) : (
+                                                label
                                             )}
                                         </dt>
-                                        {items.map((title, i) => (
-                                            <dd key={title}>
-                                                {ranked && <span className="mr-2 opacity-40">{i + 1}</span>}
-                                                {title}
-                                            </dd>
-                                        ))}
-                                    </div>
+                                        <dd>
+                                            {items.map((title) => (
+                                                <div key={title}>{title}</div>
+                                            ))}
+                                        </dd>
+                                    </Fragment>
                                 ))}
                             </dl>
                         </section>

@@ -1,5 +1,5 @@
 export const TAU = Math.PI * 2;
-export const KOI_NODES = 40;
+export const DRAGON_NODES = 40;
 export const RIPPLE_SPEED = 52;
 
 export const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
@@ -32,7 +32,7 @@ export type Variety = "crimson" | "jade" | "gold";
 /** One dragon of each colour; the last is the young one. */
 const VARIETIES: Variety[] = ["crimson", "jade", "gold"];
 
-export interface Koi {
+export interface Dragon {
     id: number;
     variety: Variety;
     length: number;
@@ -44,7 +44,7 @@ export interface Koi {
     /** Smoothed angular velocity, used to splay the fins into turns. */
     turn: number;
     wander: number;
-    /** How strongly this koi swims over to the cursor. */
+    /** How strongly this dragon swims over to the cursor. */
     curiosity: number;
     /** 0.5 deep and dim to 1 just under the surface. */
     depth: number;
@@ -52,23 +52,23 @@ export interface Koi {
     depthMax: number;
     nextDive: number;
     nextSurface: number;
-    /** When a koi swimming near the surface next sends a small ring off its tail. */
+    /** When a dragon swimming near the surface next sends a small ring off its tail. */
     nextWake: number;
-    /** 1 just after food hits the water nearby, fading: the koi sprints and turns harder while it lasts. */
+    /** 1 just after food hits the water nearby, fading: the dragon sprints and turns harder while it lasts. */
     rush: number;
-    /** The pellet this koi is going for. It sticks with it so a burst of clicks doesn't yank it around. */
+    /** The pellet this dragon is going for. It sticks with it so a burst of clicks doesn't yank it around. */
     food: Pellet | null;
-    /** Tail-beat intensity: koi swim in bursts of beats, then coast with the tail still. */
+    /** Tail-beat intensity: dragons swim in bursts of beats, then coast with the tail still. */
     beat: number;
     burstUntil: number;
     nextBurst: number;
-    /** Phase of the pectoral fins, which scull gently while the koi coasts or hovers. */
+    /** Phase of the pectoral fins, which scull gently while the dragon coasts or hovers. */
     finPhase: number;
-    /** 1 right after a fright, fading as the koi calms down. */
+    /** 1 right after a fright, fading as the dragon calms down. */
     startle: number;
     fleeX: number;
     fleeY: number;
-    /** How far the mouth is open, as the koi closes in on food. */
+    /** How far the mouth is open, as the dragon closes in on food. */
     gulp: number;
 }
 
@@ -76,7 +76,7 @@ export interface Pellet {
     x: number;
     y: number;
     born: number;
-    /** Seconds after `born` that it hits the water; until then it's falling and koi can't eat it. */
+    /** Seconds after `born` that it hits the water; until then it's falling and dragons can't eat it. */
     landAt: number;
     landed: boolean;
     /** Slow drift once it's floating. */
@@ -84,7 +84,7 @@ export interface Pellet {
     vy: number;
 }
 
-/** The moment a koi takes a pellet, drawn as a brief flash where it happened. */
+/** The moment a dragon takes a pellet, drawn as a brief flash where it happened. */
 export interface Bite {
     x: number;
     y: number;
@@ -137,14 +137,14 @@ export class World {
     width = 0;
     height = 0;
     time = 0;
-    koi: Koi[] = [];
+    dragons: Dragon[] = [];
     pellets: Pellet[] = [];
     bites: Bite[] = [];
-    /** Moving the mouse to throw food isn't a threat, so swipes don't startle koi for a moment after a throw. */
+    /** Moving the mouse to throw food isn't a threat, so swipes don't startle dragons for a moment after a throw. */
     private lastFeed = -Infinity;
     ripples: Ripple[] = [];
     pointer = { x: 0, y: 0, speed: 0, active: false };
-    /** Page content the koi steer around, in canvas space. */
+    /** Page content the dragons steer around, in canvas space. */
     avoid: Box[] = [];
 
     resize(width: number, height: number) {
@@ -158,7 +158,7 @@ export class World {
         const { width: W, height: H } = this;
         const minSide = Math.min(W, H);
         const baseLength = clamp(minSide * 1.2, 380, 950);
-        this.koi = [];
+        this.dragons = [];
         // Two grown dragons and a young one that keeps to the deep water, for a sense of depth.
         for (let i = 0; i < VARIETIES.length; i++) {
             const isYoung = i === VARIETIES.length - 1;
@@ -167,17 +167,17 @@ export class World {
             const heading = rand(0, TAU);
             const x = rand(W * 0.1, W * 0.9);
             const y = rand(H * 0.1, H * 0.9);
-            const nodes = new Float32Array(KOI_NODES * 2);
-            const seg = length / (KOI_NODES - 1);
+            const nodes = new Float32Array(DRAGON_NODES * 2);
+            const seg = length / (DRAGON_NODES - 1);
             // Laid out in a loose S rather than a straight rod, so the first frame already looks like a dragon.
             nodes[0] = x;
             nodes[1] = y;
-            for (let n = 1; n < KOI_NODES; n++) {
-                const a = heading + 0.6 * Math.sin((n / KOI_NODES) * TAU);
+            for (let n = 1; n < DRAGON_NODES; n++) {
+                const a = heading + 0.6 * Math.sin((n / DRAGON_NODES) * TAU);
                 nodes[n * 2] = nodes[(n - 1) * 2] - Math.cos(a) * seg;
                 nodes[n * 2 + 1] = nodes[(n - 1) * 2 + 1] - Math.sin(a) * seg;
             }
-            this.koi.push({
+            this.dragons.push({
                 id: i + 1,
                 variety: VARIETIES[i],
                 length,
@@ -230,7 +230,7 @@ export class World {
     step(dt: number) {
         this.time += dt;
         this.pointer.speed *= Math.exp(-dt * 8);
-        for (const k of this.koi) this.stepKoi(k, dt);
+        for (const k of this.dragons) this.stepDragon(k, dt);
         const t = this.time;
         this.pellets = this.pellets.filter((p) => t - p.born < PELLET_LIFE);
         for (const p of this.pellets) {
@@ -238,8 +238,8 @@ export class World {
                 if (t - p.born < p.landAt) continue;
                 p.landed = true;
                 this.ripples.push({ x: p.x, y: p.y, born: t, strength: 0.1 });
-                // The splash is what koi react to: every koi in range turns and bolts for it at once.
-                for (const k of this.koi) {
+                // The splash is what dragons react to: every dragon in range turns and bolts for it at once.
+                for (const k of this.dragons) {
                     if (Math.hypot(k.nodes[0] - p.x, k.nodes[1] - p.y) < RUSH_RANGE) k.rush = 1;
                 }
                 continue;
@@ -254,7 +254,7 @@ export class World {
         this.bites = this.bites.filter((b) => t - b.born < BITE_LIFE);
     }
 
-    private stepKoi(k: Koi, dt: number) {
+    private stepDragon(k: Dragon, dt: number) {
         const { width: W, height: H, pointer, time } = this;
         const L = k.length;
         const nodes = k.nodes;
@@ -270,8 +270,8 @@ export class World {
 
         const food = this.pickFood(k, hx, hy, Math.max(L * 1.6 + 220, k.rush > 0 ? RUSH_RANGE : 0));
 
-        // A fast swipe close by spooks a koi: it bolts away, then calms down over a couple of seconds.
-        // A koi already going for food ignores it; feeding beats fear, and clicking to feed moves the mouse fast.
+        // A fast swipe close by spooks a dragon: it bolts away, then calms down over a couple of seconds.
+        // A dragon already going for food ignores it; feeding beats fear, and clicking to feed moves the mouse fast.
         const pointerD = Math.hypot(pointer.x - hx, pointer.y - hy);
         const feeding = time - this.lastFeed < FEED_CALM;
         if (!food && !feeding && pointer.active && pointer.speed > STARTLE_SPEED && pointerD < L * 0.9) {
@@ -314,16 +314,16 @@ export class World {
             }
         }
 
-        for (const other of this.koi) {
+        for (const other of this.dragons) {
             if (other === k) continue;
             const ohx = other.nodes[0];
             const ohy = other.nodes[1];
             if (Math.abs(ohx - hx) > L * 2 || Math.abs(ohy - hy) > L * 2) continue;
-            for (let n = 0; n < KOI_NODES; n += 3) {
+            for (let n = 0; n < DRAGON_NODES; n += 3) {
                 const ox = hx - other.nodes[n * 2];
                 const oy = hy - other.nodes[n * 2 + 1];
                 const d = Math.hypot(ox, oy);
-                // Koi going for food jostle in close, so personal space shrinks and never outweighs the pull.
+                // Dragons going for food jostle in close, so personal space shrinks and never outweighs the pull.
                 const range = (L + other.length) * (food ? 0.04 : 0.1);
                 if (d < range && d > 1e-3) {
                     const w = (1 - d / range) * 2.4;
@@ -331,7 +331,7 @@ export class World {
                     dy += (oy / d) * w;
                 }
             }
-            // Loose shoaling: nearby koi drift the same way.
+            // Loose shoaling: nearby dragons drift the same way.
             if (!chasing && Math.hypot(ohx - hx, ohy - hy) < L * 1.6) {
                 dx += Math.cos(other.heading) * 0.18;
                 dy += Math.sin(other.heading) * 0.18;
@@ -365,16 +365,16 @@ export class World {
         k.turn += (turned / dt - k.turn) * Math.min(1, dt * 3);
 
         // Burst and coast: a few strong tail beats, then a long glide that bleeds off speed.
-        // Chasing or fleeing koi beat without pause.
+        // Chasing or fleeing dragons beat without pause.
         if (time > k.nextBurst && time > k.burstUntil) {
             k.burstUntil = time + rand(0.7, 1.6);
             k.nextBurst = k.burstUntil + rand(1.2, 4);
         }
         const bursting = fleeing || chasing || time < k.burstUntil;
         k.beat += ((bursting ? 1 : 0) - k.beat) * Math.min(1, dt * 3);
-        // Tail beats near the surface push small rings out behind the koi; gliding or deep koi leave none.
+        // Tail beats near the surface push small rings out behind the dragon; gliding or deep dragons leave none.
         if (k.beat > 0.6 && k.depth > 0.65 && time > k.nextWake) {
-            const tail = (KOI_NODES - 3) * 2;
+            const tail = (DRAGON_NODES - 3) * 2;
             this.ripples.push({ x: nodes[tail], y: nodes[tail + 1], born: time, strength: 0.25 + 0.2 * k.depth });
             k.nextWake = time + rand(0.8, 1.6) / k.beat;
         }
@@ -395,7 +395,7 @@ export class World {
         k.finPhase += dt * (1.6 + k.speed / 20);
         k.gulp += ((chasing && closing > 0.55 ? 1 : 0) - k.gulp) * Math.min(1, dt * 6);
 
-        // Koi drift between the deep and the surface, and rise for food.
+        // Dragons drift between the deep and the surface, and rise for food.
         if (time > k.nextDive) {
             k.depthTarget = rand(0.5, k.depthMax);
             k.nextDive = time + rand(8, 20);
@@ -405,10 +405,10 @@ export class World {
         nodes[0] += Math.cos(k.heading) * k.speed * dt;
         nodes[1] += Math.sin(k.heading) * k.speed * dt;
 
-        const seg = L / (KOI_NODES - 1);
+        const seg = L / (DRAGON_NODES - 1);
         const maxBend = 0.16;
         let prevAngle = k.heading + Math.PI;
-        for (let n = 1; n < KOI_NODES; n++) {
+        for (let n = 1; n < DRAGON_NODES; n++) {
             const px = nodes[(n - 1) * 2];
             const py = nodes[(n - 1) * 2 + 1];
             let angle = Math.atan2(nodes[n * 2 + 1] - py, nodes[n * 2] - px);
@@ -434,7 +434,7 @@ export class World {
     }
 
     /** Keep the current target while it lasts; only switch for a pellet less than half as far away. */
-    private pickFood(k: Koi, x: number, y: number, range: number) {
+    private pickFood(k: Dragon, x: number, y: number, range: number) {
         if (k.food && !this.pellets.includes(k.food)) k.food = null;
         const nearest = this.nearestPellet(x, y, range);
         if (!k.food) return (k.food = nearest);

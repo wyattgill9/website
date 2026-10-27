@@ -16,21 +16,21 @@ import {
     clamp,
     hash3,
     BITE_LIFE,
-    KOI_NODES,
+    DRAGON_NODES,
     PELLET_LIFE,
     PELLET_SINK,
     RIPPLE_SPEED,
     rippleLife,
     smoothstep,
     type Box,
-    type Koi,
+    type Dragon,
     type Variety,
     type World,
 } from "./world";
 
 type Rgb = [number, number, number];
 
-// How visible a koi stays while it swims under page content.
+// How visible a dragon stays while it swims under page content.
 const DIM_UNDER_CONTENT = 0.15;
 
 interface Palette {
@@ -45,7 +45,7 @@ interface Palette {
     shadow: Rgb;
     shadowAlpha: number;
     alpha: number;
-    /** How much a deep koi fades, as the alpha it keeps at the bottom of the pond. */
+    /** How much a deep dragon fades, as the alpha it keeps at the bottom of the pond. */
     depthFloor: number;
     /** Each dragon's scales from deep shadow to a lit highlight, so the body shades across hues. */
     scales: Record<Variety, Rgb[]>;
@@ -181,7 +181,7 @@ const shade = (c: Rgb, k: number): Rgb => [
     Math.min(255, c[2] * k) | 0,
 ];
 
-export class KoiRenderer {
+export class DragonRenderer {
     private ctx: CanvasRenderingContext2D;
     private dpr = 1;
     private cw = 8;
@@ -200,11 +200,11 @@ export class KoiRenderer {
     private cellTile = new Uint32Array(0);
     private cellTileAlpha = new Float32Array(0);
     private cellDim = new Float32Array(0);
-    /** Cells under a koi's shadow on the pond floor. */
+    /** Cells under a dragon's shadow on the pond floor. */
     private cellShadow = new Uint8Array(0);
 
-    private spine = new Float32Array(KOI_NODES * 2);
-    private arc = new Float32Array(KOI_NODES);
+    private spine = new Float32Array(DRAGON_NODES * 2);
+    private arc = new Float32Array(DRAGON_NODES);
     private arcTotal = 1;
     private flareLeft = 1;
     private flareRight = 1;
@@ -249,7 +249,7 @@ export class KoiRenderer {
         this.cellShadow = new Uint8Array(n);
     }
 
-    /** Fade koi under these canvas-space boxes, easing back in over a few cells around them. */
+    /** Fade dragons under these canvas-space boxes, easing back in over a few cells around them. */
     setDimBoxes(boxes: Box[]) {
         const { cols, rows, cw, ch, cellDim } = this;
         cellDim.fill(1);
@@ -281,8 +281,8 @@ export class KoiRenderer {
         this.cellGlyph.fill(0);
         this.cellTileAlpha.fill(0);
         this.cellShadow.fill(0);
-        // Deeper koi first, so the ones near the surface glide over them.
-        for (const k of [...world.koi].sort((a, b) => a.depth - b.depth)) this.rasterizeKoi(k, world.time);
+        // Deeper dragons first, so the ones near the surface glide over them.
+        for (const k of [...world.dragons].sort((a, b) => a.depth - b.depth)) this.rasterizeDragon(k, world.time);
         this.depositWake(world);
         this.diffuse(dt);
 
@@ -325,10 +325,10 @@ export class KoiRenderer {
         return r * this.cols + c;
     }
 
-    // ── koi ─────────────────────────────────────────────────────────────
+    // ── dragons ─────────────────────────────────────────────────────────
 
-    /** Find the nearest point on the render spine, then classify it against the koi's outline. */
-    private sample(px: number, py: number, L: number, from = 0, to = KOI_NODES - 2) {
+    /** Find the nearest point on the render spine, then classify it against the dragon's outline. */
+    private sample(px: number, py: number, L: number, from = 0, to = DRAGON_NODES - 2) {
         const { spine, arc } = this;
         let best = Infinity;
         let bestS = 0;
@@ -350,7 +350,7 @@ export class KoiRenderer {
                 best = d2;
                 bestS = (arc[n] + u * len) / this.arcTotal;
                 bestSign = sx * (py - ay) - sy * (px - ax) >= 0 ? 1 : -1;
-                past = n === KOI_NODES - 2 ? Math.max(0, raw - 1) * len : 0;
+                past = n === DRAGON_NODES - 2 ? Math.max(0, raw - 1) * len : 0;
                 ahead = n === 0 ? Math.max(0, -raw) * len : 0;
                 lateral = Math.abs(sx * (py - ay) - sy * (px - ax)) / len;
                 this.hitTx = sx / len;
@@ -374,7 +374,7 @@ export class KoiRenderer {
         );
     }
 
-    private rasterizeKoi(k: Koi, t: number) {
+    private rasterizeDragon(k: Dragon, t: number) {
         const { spine, arc, cw, ch, cols, rows, cellGlyph, cellColor, cellAlpha, cellTile, cellTileAlpha, palette } =
             this;
         const L = k.length;
@@ -383,10 +383,10 @@ export class KoiRenderer {
         const swim = 0.5 + 0.7 * k.beat;
 
         // A serpentine wave, about two crests long, travelling down the whole body.
-        for (let n = 0; n < KOI_NODES; n++) {
-            const s = n / (KOI_NODES - 1);
+        for (let n = 0; n < DRAGON_NODES; n++) {
+            const s = n / (DRAGON_NODES - 1);
             const a = Math.max(0, n - 1);
-            const b = Math.min(KOI_NODES - 1, n + 1);
+            const b = Math.min(DRAGON_NODES - 1, n + 1);
             let tx = nodes[a * 2] - nodes[b * 2];
             let ty = nodes[a * 2 + 1] - nodes[b * 2 + 1];
             const tl = Math.hypot(tx, ty) || 1;
@@ -398,11 +398,11 @@ export class KoiRenderer {
             spine[n * 2 + 1] = nodes[n * 2 + 1] + tx * off;
         }
         arc[0] = 0;
-        for (let n = 1; n < KOI_NODES; n++) {
+        for (let n = 1; n < DRAGON_NODES; n++) {
             arc[n] =
                 arc[n - 1] + Math.hypot(spine[n * 2] - spine[(n - 1) * 2], spine[n * 2 + 1] - spine[(n - 1) * 2 + 1]);
         }
-        this.arcTotal = arc[KOI_NODES - 1] || 1;
+        this.arcTotal = arc[DRAGON_NODES - 1] || 1;
         // Legs paddle in a diagonal gait, so the two sides swing in opposite phase.
         const stride = Math.sin(k.finPhase) * (0.4 + 0.6 * k.beat);
         this.flareLeft = stride;
@@ -412,7 +412,7 @@ export class KoiRenderer {
         let minY = Infinity;
         let maxX = -Infinity;
         let maxY = -Infinity;
-        for (let n = 0; n < KOI_NODES; n++) {
+        for (let n = 0; n < DRAGON_NODES; n++) {
             minX = Math.min(minX, spine[n * 2]);
             maxX = Math.max(maxX, spine[n * 2]);
             minY = Math.min(minY, spine[n * 2 + 1]);
@@ -426,7 +426,7 @@ export class KoiRenderer {
         if (c0 > c1 || r0 > r1) return;
 
         const diag = Math.hypot(cw, ch);
-        // Near the surface a koi is brighter and its shadow falls farther away on the floor.
+        // Near the surface a dragon is brighter and its shadow falls farther away on the floor.
         const shadowDc = Math.round((L * 0.07 * k.depth) / cw) + 1;
         const shadowDr = Math.round((L * 0.05 * k.depth) / ch) + 1;
         const dim = palette.alpha * (palette.depthFloor + (1 - palette.depthFloor) * k.depth);
@@ -444,7 +444,7 @@ export class KoiRenderer {
                 }
                 // Sub-samples sit within a cell of the centre, so only the neighbouring segments can be nearest.
                 const from = Math.max(0, this.hitSeg - 2);
-                const to = Math.min(KOI_NODES - 2, this.hitSeg + 2);
+                const to = Math.min(DRAGON_NODES - 2, this.hitSeg + 2);
                 let { flag, across, du, da } = hit;
                 let s = this.hitS;
                 let v = this.hitV;
@@ -452,7 +452,7 @@ export class KoiRenderer {
                 let ty = this.hitTy;
 
                 let hits = centerHit ? 1 : 0;
-                // Points from the cell centre toward the covered side, i.e. across the outline into the koi.
+                // Points from the cell centre toward the covered side, i.e. across the outline into the dragon.
                 let gx = 0;
                 let gy = 0;
                 // Cells well inside the body can't have a sub-sample outside it, so skip straight to full coverage.
@@ -604,8 +604,8 @@ export class KoiRenderer {
 
     private depositWake(world: World) {
         const { energy } = this;
-        for (const k of world.koi) {
-            for (let n = KOI_NODES - 4; n < KOI_NODES; n++) {
+        for (const k of world.dragons) {
+            for (let n = DRAGON_NODES - 4; n < DRAGON_NODES; n++) {
                 const i = this.cellIndex(k.nodes[n * 2], k.nodes[n * 2 + 1]);
                 if (i >= 0) energy[i] = Math.min(1.5, energy[i] + 0.035 + k.speed * 0.0012);
             }
@@ -683,7 +683,7 @@ export class KoiRenderer {
         }
     }
 
-    /** A bite flashes * over the koi's mouth, settling to + then a dot as the splash takes over. */
+    /** A bite flashes * over the dragon's mouth, settling to + then a dot as the splash takes over. */
     private drawBites(world: World) {
         const { palette } = this;
         for (const b of world.bites) {

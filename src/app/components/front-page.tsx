@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import { useGlobal } from "../../context-providers/global-provider";
 import Cited from "./citation";
 import Container from "./container";
-import type { PondStats } from "./koi-pond/koi-pond";
 import { SOURCES } from "../data/sources";
 
 const SOCIALS = [
@@ -18,6 +17,9 @@ const UNDERLINE =
 
 const QuoteLines = () => (
     <>
+        {/* 鲤鱼跃龙门, "the carp leaps the dragon gate": a carp that clears the falls becomes a dragon. */}
+        <span lang="zh-Hans">鲤鱼跃龙门</span>
+        <br />
         the carp that clears the gate
         <br />
         becomes a dragon
@@ -42,39 +44,21 @@ const Socials = ({ className }: { className?: string }) => (
     </p>
 );
 
-const FrontPage = ({ stats }: { stats: PondStats }) => {
+const FrontPage = () => {
     const { isMobile } = useGlobal();
 
     if (isMobile === null) return null;
-    return isMobile ? mobilePage() : desktopPage({ stats });
+    return isMobile ? mobilePage() : desktopPage();
 };
 
-const desktopPage = ({ stats }: { stats: PondStats }) => {
+const desktopPage = () => {
     return (
         <Container
             as="header"
-            className="relative flex h-full flex-col justify-end gap-10 bg-transparent pb-32 pt-32 text-foreground [@media(max-height:720px)]:gap-6 [@media(max-height:720px)]:pb-12 [@media(max-height:720px)]:pt-20"
+            className="flex h-full flex-col justify-end gap-10 bg-transparent pb-32 pt-32 text-foreground [@media(max-height:720px)]:gap-6 [@media(max-height:720px)]:pb-12 [@media(max-height:720px)]:pt-20"
         >
-            {stats.koi > 0 && (
-                <div
-                    data-koi-avoid
-                    aria-hidden="true"
-                    className="absolute right-6 top-20 font-geistMono text-[11px] leading-relaxed tabular-nums lg:right-[20vw]"
-                >
-                    <div className="opacity-[0.32]">{stats.koi}</div>
-                    {/* The pellet count flashes each time it changes, tying a click or a bite to the number. */}
-                    <motion.div
-                        key={stats.pellets}
-                        initial={{ opacity: 1 }}
-                        animate={{ opacity: 0.32 }}
-                        transition={{ duration: 0.6, ease: "easeOut" }}
-                    >
-                        {stats.pellets}
-                    </motion.div>
-                </div>
-            )}
             <motion.blockquote
-                data-koi-avoid
+                data-dragon-avoid
                 className="font-geistMono text-[14px] lowercase leading-relaxed tracking-[0.02em]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.6 }}
@@ -83,7 +67,7 @@ const desktopPage = ({ stats }: { stats: PondStats }) => {
                 <QuoteLines />
             </motion.blockquote>
             <motion.div
-                data-koi-avoid
+                data-dragon-avoid
                 className="cited-prose max-w-[54rem] font-geistMono text-[15px] leading-[max(22px,3vh)]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -94,8 +78,9 @@ const desktopPage = ({ stats }: { stats: PondStats }) => {
                     Systems engineer in San Francisco, most recently @ <Cited source="ix">ix.dev</Cited>.
                 </p>
                 <p>
-                    I make builds incremental and runtimes fast, in <Cited source="rust">Rust</Cited>,{" "}
-                    <Cited source="cpp">C++</Cited> and <Cited source="nixos">Nix</Cited>.
+                    <Cited source="rust">Rust</Cited> and <Cited source="cpp">C++</Cited> on{" "}
+                    <Cited source="nixos">NixOS</Cited>, with <Cited source="helix">Helix</Cited> +{" "}
+                    <Cited source="tmux">tmux</Cited>.
                 </p>
                 <p>
                     Favorite paper: <Cited source="raft">Raft</Cited>. More on my <Cited source="shelf">shelf</Cited>.
@@ -121,7 +106,7 @@ const mobilePage = () => {
             className="flex h-full flex-col justify-end gap-8 bg-transparent pb-12 pt-28 font-geistMono text-foreground [@media(max-height:640px)]:gap-5 [@media(max-height:640px)]:pb-8"
         >
             <motion.blockquote
-                data-koi-avoid
+                data-dragon-avoid
                 className="text-[13px] lowercase leading-relaxed tracking-[0.02em]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.6 }}
@@ -130,7 +115,7 @@ const mobilePage = () => {
                 <QuoteLines />
             </motion.blockquote>
             <motion.div
-                data-koi-avoid
+                data-dragon-avoid
                 className="flex flex-col gap-3 text-[14px] leading-[1.6]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -141,8 +126,9 @@ const mobilePage = () => {
                     Systems engineer in San Francisco, most recently @ <MobileLink source="ix">ix.dev</MobileLink>.
                 </p>
                 <p>
-                    I make builds incremental and runtimes fast, in <MobileLink source="rust">Rust</MobileLink>,{" "}
-                    <MobileLink source="cpp">C++</MobileLink> and <MobileLink source="nixos">Nix</MobileLink>.
+                    <MobileLink source="rust">Rust</MobileLink> and <MobileLink source="cpp">C++</MobileLink> on{" "}
+                    <MobileLink source="nixos">NixOS</MobileLink>, with <MobileLink source="helix">Helix</MobileLink> +{" "}
+                    <MobileLink source="tmux">tmux</MobileLink>.
                 </p>
                 <p>
                     Favorite paper: <MobileLink source="raft">Raft</MobileLink>.
