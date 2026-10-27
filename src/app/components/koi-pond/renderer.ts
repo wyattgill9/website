@@ -7,6 +7,7 @@ import {
     FLAG_EYE,
     FLAG_HAIR,
     FLAG_LEG,
+    FLAG_SPIKE,
     FLAG_WHISKER,
     REACH,
     type ShapeHit,
@@ -505,6 +506,12 @@ export class KoiRenderer {
                     tileAlpha = dim;
                     glyph = "o";
                     rgb = hair;
+                } else if (flag === FLAG_SPIKE) {
+                    // Dark scale spikes tipped in the hair colour, pointing out and back.
+                    tile = ramp(scales, 0.1);
+                    tileAlpha = dim * coverage * 0.6;
+                    glyph = lineGlyph(tx * 0.6 + ox, ty * 0.6 + oy);
+                    rgb = across > 0.4 ? hair : shade(tile, palette.ink + 0.6);
                 } else if (flag === FLAG_ANTLER) {
                     glyph = lineGlyph(tx * du + ox * da, ty * du + oy * da);
                     rgb = palette.fin;
@@ -688,9 +695,9 @@ export class KoiRenderer {
         }
     }
 
-    /** Pearls fall in (' then .), land as @ with a splash, shimmer while floating, then dim to . as they sink. */
+    /** Pearls fall in (' then .), land as a glowing O with a splash, shimmer while floating, then dim to . as they sink. */
     private drawPellets(world: World) {
-        const { cellGlyph, palette, ch } = this;
+        const { ctx, cellGlyph, palette, cw, ch, cols } = this;
         for (const p of world.pellets) {
             const age = world.time - p.born;
             if (!p.landed) {
@@ -705,7 +712,21 @@ export class KoiRenderer {
             if (i < 0 || cellGlyph[i]) continue;
             const sink = smoothstep(PELLET_SINK, PELLET_LIFE, age);
             const bob = 0.8 + 0.2 * Math.sin(age * 3 + p.x);
-            this.glyphAt(i, sink > 0.55 ? "." : "@", palette.pellet, palette.alpha * bob * (1 - 0.85 * sink));
+            const glow = palette.alpha * bob * (1 - 0.85 * sink);
+            // A soft round halo under the pearl, so it reads as a lit orb rather than a pellet.
+            const cx = (i % cols) * cw + cw / 2;
+            const cy = ((i / cols) | 0) * ch + ch / 2;
+            ctx.fillStyle = this.style(packRgb(palette.pellet));
+            for (const [r, a] of [
+                [1.6, 0.1],
+                [0.9, 0.22],
+            ]) {
+                ctx.globalAlpha = glow * a;
+                ctx.beginPath();
+                ctx.arc(cx, cy, cw * r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            this.glyphAt(i, sink > 0.55 ? "." : "O", palette.pellet, glow);
         }
     }
 }

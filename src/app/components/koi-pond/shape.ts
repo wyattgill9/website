@@ -7,6 +7,7 @@ export const FLAG_DORSAL = 4;
 export const FLAG_WHISKER = 5;
 export const FLAG_LEG = 6;
 export const FLAG_ANTLER = 7;
+export const FLAG_SPIKE = 8;
 
 /** Farthest any part reaches from the spine, as a fraction of length: the whisker tips ahead of the snout. */
 export const REACH = 0.12;
@@ -105,10 +106,18 @@ export function classify(s: number, a: number, past: number, stride: number, out
         return true;
     }
 
+    // A sawtooth frill down the flanks, each spike leaning back toward the tail.
+    if (s > 0.13 && s < 0.84 && a <= w + 0.016 * (1 - ((s * 28) % 1))) {
+        out.flag = FLAG_SPIKE;
+        out.across = clamp((a - w) / 0.016, 0, 1);
+        return true;
+    }
+
     // Diagonal gait: a side's front leg reaches forward as its back leg pushes back.
     return (
         inLimb(s, a, 0.2, 1.15 + 0.45 * stride, 0.032, 0.009, FLAG_LEG, out) ||
         inLimb(s, a, 0.58, 1.15 - 0.45 * stride, 0.03, 0.009, FLAG_LEG, out) ||
-        inLimb(s, a, 0.035, 0.45, 0.04, 0.006, FLAG_ANTLER, out)
+        inLimb(s, a, 0.035, 0.4, 0.055, 0.007, FLAG_ANTLER, out) ||
+        inLimb(s, a, 0.06, 0.95, 0.025, 0.006, FLAG_ANTLER, out)
     );
 }

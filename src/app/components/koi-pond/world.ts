@@ -29,21 +29,8 @@ export type Box = { left: number; top: number; right: number; bottom: number };
 
 export type Variety = "crimson" | "jade" | "gold";
 
-const VARIETY_WEIGHTS: [Variety, number][] = [
-    ["crimson", 3],
-    ["jade", 2],
-    ["gold", 2],
-];
-const TOTAL_WEIGHT = VARIETY_WEIGHTS.reduce((sum, [, w]) => sum + w, 0);
-
-function pickVariety(): Variety {
-    let r = Math.random() * TOTAL_WEIGHT;
-    for (const [variety, weight] of VARIETY_WEIGHTS) {
-        r -= weight;
-        if (r <= 0) return variety;
-    }
-    return "crimson";
-}
+/** One dragon of each colour; the last is the young one. */
+const VARIETIES: Variety[] = ["crimson", "jade", "gold"];
 
 export interface Koi {
     id: number;
@@ -171,13 +158,10 @@ export class World {
         const { width: W, height: H } = this;
         const minSide = Math.min(W, H);
         const baseLength = clamp(minSide * 1.2, 380, 950);
-        const count = W >= 1024 ? 2 : 1;
-        // Wide screens also get a young dragon that keeps to the deep water, for a sense of depth.
-        const young = W >= 1024 ? 1 : 0;
-
         this.koi = [];
-        for (let i = 0; i < count + young; i++) {
-            const isYoung = i >= count;
+        // Two grown dragons and a young one that keeps to the deep water, for a sense of depth.
+        for (let i = 0; i < VARIETIES.length; i++) {
+            const isYoung = i === VARIETIES.length - 1;
             const length = baseLength * (isYoung ? rand(0.4, 0.5) : rand(0.75, 1));
             const depthMax = isYoung ? 0.72 : 1;
             const heading = rand(0, TAU);
@@ -195,7 +179,7 @@ export class World {
             }
             this.koi.push({
                 id: i + 1,
-                variety: pickVariety(),
+                variety: VARIETIES[i],
                 length,
                 nodes,
                 heading,
