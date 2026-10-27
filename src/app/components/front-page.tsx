@@ -65,7 +65,7 @@ const desktopPage = () => {
     return (
         <Container
             as="header"
-            className="flex h-full flex-col justify-start gap-10 bg-transparent pb-12 pt-24 text-foreground [@media(max-height:720px)]:gap-6 [@media(max-height:720px)]:pt-20"
+            className="flex h-full flex-col justify-end gap-10 bg-transparent pb-32 pt-32 text-foreground [@media(max-height:720px)]:gap-6 [@media(max-height:720px)]:pb-12 [@media(max-height:720px)]:pt-20"
         >
             <motion.blockquote
                 data-dragon-avoid
@@ -114,7 +114,7 @@ const mobilePage = () => {
         // Top padding clears the floating nav pill.
         <Container
             as="header"
-            className="flex h-full flex-col justify-start gap-8 bg-transparent pb-12 pt-28 font-geistMono text-foreground [@media(max-height:640px)]:gap-5"
+            className="flex h-full flex-col justify-end gap-8 bg-transparent pb-12 pt-28 font-geistMono text-foreground [@media(max-height:640px)]:gap-5 [@media(max-height:640px)]:pb-8"
         >
             <motion.blockquote
                 data-dragon-avoid
