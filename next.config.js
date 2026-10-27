@@ -14,6 +14,12 @@ const nextConfig = {
         return [
             { source: "/ingest/static/:path*", destination: "https://us-assets.i.posthog.com/static/:path*" },
             { source: "/ingest/:path*", destination: "https://us.i.posthog.com/:path*" },
+            // "gif it" is its own GitHub Pages repo; serve it at its old wyattgill.com URL. Needs the custom domain
+            // removed from wyattgill9.github.io, or github.io redirects back here and the request loops.
+            {
+                source: "/discord_gif_website/:path*",
+                destination: "https://wyattgill9.github.io/discord_gif_website/:path*",
+            },
         ];
     },
     skipTrailingSlashRedirect: true,
