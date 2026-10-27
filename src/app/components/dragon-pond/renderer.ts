@@ -17,10 +17,6 @@ import {
     hash3,
     BITE_LIFE,
     DRAGON_NODES,
-    PELLET_LIFE,
-    PELLET_SINK,
-    RIPPLE_SPEED,
-    rippleLife,
     smoothstep,
     type Box,
     type Dragon,
@@ -30,7 +26,7 @@ import {
 
 type Rgb = [number, number, number];
 
-// How visible a dragon stays while it swims under page content.
+// How visible a dragon stays while it flies under page content.
 const DIM_UNDER_CONTENT = 0.15;
 
 interface Palette {
@@ -40,12 +36,11 @@ interface Palette {
     /** Antlers: bone, whatever the dragon's colour. */
     fin: Rgb;
     eye: Rgb;
+    /** Cloud wisps trailing behind the dragons. */
     water: Rgb;
     pellet: Rgb;
-    shadow: Rgb;
-    shadowAlpha: number;
     alpha: number;
-    /** How much a deep dragon fades, as the alpha it keeps at the bottom of the pond. */
+    /** How much a far-off dragon fades into the haze, as the alpha it keeps at its farthest. */
     depthFloor: number;
     /** Each dragon's scales from deep shadow to a lit highlight, so the body shades across hues. */
     scales: Record<Variety, Rgb[]>;
@@ -61,8 +56,6 @@ const DARK: Palette = {
     fin: [214, 206, 198],
     eye: [20, 20, 26],
     water: [255, 247, 240],
-    shadow: [0, 0, 0],
-    shadowAlpha: 0.55,
     pellet: [250, 236, 196],
     alpha: 0.8,
     depthFloor: 0.4,
@@ -103,8 +96,6 @@ const LIGHT: Palette = {
     fin: [138, 132, 126],
     eye: [24, 22, 26],
     water: [38, 37, 35],
-    shadow: [60, 58, 56],
-    shadowAlpha: 0.2,
     pellet: [176, 128, 40],
     alpha: 0.9,
     depthFloor: 0.55,
@@ -142,7 +133,7 @@ const LIGHT: Palette = {
 const TILE_GLYPHS = "t%SX8@#";
 const SUBSAMPLES = [0.25, 0.25, 0.75, 0.25, 0.25, 0.75, 0.75, 0.75];
 
-// A line glyph that follows a direction in screen space, for fin rays and ripple rings.
+// A line glyph that follows a direction in screen space, for limbs, whiskers and claws.
 function lineGlyph(dx: number, dy: number) {
     const d = Math.hypot(dx, dy) || 1;
     if (Math.abs(dy) < 0.38 * d) return "-";
@@ -200,8 +191,6 @@ export class DragonRenderer {
     private cellTile = new Uint32Array(0);
     private cellTileAlpha = new Float32Array(0);
     private cellDim = new Float32Array(0);
-    /** Cells under a dragon's shadow on the pond floor. */
-    private cellShadow = new Uint8Array(0);
 
     private spine = new Float32Array(DRAGON_NODES * 2);
     private arc = new Float32Array(DRAGON_NODES);
@@ -246,7 +235,6 @@ export class DragonRenderer {
         this.cellTile = new Uint32Array(n);
         this.cellTileAlpha = new Float32Array(n);
         this.cellDim = new Float32Array(n).fill(1);
-        this.cellShadow = new Uint8Array(n);
     }
 
     /** Fade dragons under these canvas-space boxes, easing back in over a few cells around them. */
@@ -280,8 +268,7 @@ export class DragonRenderer {
 
         this.cellGlyph.fill(0);
         this.cellTileAlpha.fill(0);
-        this.cellShadow.fill(0);
-        // Deeper dragons first, so the ones near the surface glide over them.
+        // Farther dragons first, so the near ones fly over them.
         for (const k of [...world.dragons].sort((a, b) => a.depth - b.depth)) this.rasterizeDragon(k, world.time);
         this.depositWake(world);
         this.diffuse(dt);
@@ -293,9 +280,7 @@ export class DragonRenderer {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
-        this.drawShadows();
         this.drawWake();
-        this.drawRipples(world);
         this.drawPellets(world);
         this.drawCells();
         this.drawBites(world);
@@ -426,9 +411,7 @@ export class DragonRenderer {
         if (c0 > c1 || r0 > r1) return;
 
         const diag = Math.hypot(cw, ch);
-        // Near the surface a dragon is brighter and its shadow falls farther away on the floor.
-        const shadowDc = Math.round((L * 0.07 * k.depth) / cw) + 1;
-        const shadowDr = Math.round((L * 0.05 * k.depth) / ch) + 1;
+        // Up close a dragon is brighter; far off it fades into the haze.
         const dim = palette.alpha * (palette.depthFloor + (1 - palette.depthFloor) * k.depth);
         const hit = this.hit;
 
@@ -545,9 +528,6 @@ export class DragonRenderer {
                     const plate = flag === FLAG_DORSAL && Math.floor((s * L) / (cw * 1.4)) % 2 === 0;
                     if (plate) tile = mix(tile, hair, 0.7);
                     if (hits === 5) {
-                        const sc = c + shadowDc;
-                        const sr = r + shadowDr;
-                        if (sc < cols && sr < rows) this.cellShadow[sr * cols + sc] = 1;
                         tileAlpha = dim;
                         if (s < 0.02 && across < 0.6 && k.gulp > 0.5) {
                             glyph = "o";
@@ -600,7 +580,7 @@ export class DragonRenderer {
         }
     }
 
-    // ── water ───────────────────────────────────────────────────────────
+    // ── sky ─────────────────────────────────────────────────────────────
 
     private depositWake(world: World) {
         const { energy } = this;
@@ -616,7 +596,7 @@ export class DragonRenderer {
         }
     }
 
-    /** Blur and decay so wakes spread like ripples and fade. */
+    /** Blur and decay so trails billow out like cloud and fade. */
     private diffuse(dt: number) {
         const { cols, rows, energy, energyTmp: tmp } = this;
         const decay = Math.exp(-dt * 1.1);
@@ -634,56 +614,16 @@ export class DragonRenderer {
         this.energyTmp = energy;
     }
 
-    private drawShadows() {
-        const { cellShadow, cellGlyph, cellDim, palette } = this;
-        for (let i = 0; i < cellShadow.length; i++) {
-            if (!cellShadow[i] || cellGlyph[i]) continue;
-            this.glyphAt(i, ":", palette.shadow, palette.shadowAlpha * cellDim[i]);
-        }
-    }
-
     private drawWake() {
-        const { energy, cellGlyph, cellShadow, palette } = this;
+        const { energy, cellGlyph, palette } = this;
         for (let i = 0; i < energy.length; i++) {
             const e = energy[i];
-            if (e < 0.22 || cellGlyph[i] || cellShadow[i]) continue;
-            this.glyphAt(i, e > 0.5 ? "-" : ".", palette.water, Math.min(1, (e - 0.22) * 1.4) * 0.35);
+            if (e < 0.22 || cellGlyph[i]) continue;
+            this.glyphAt(i, e > 0.5 ? "~" : ".", palette.water, Math.min(1, (e - 0.22) * 1.4) * 0.35);
         }
     }
 
-    /** Expanding rings drawn as ASCII circles: the glyph follows the ring's tangent. */
-    private drawRipples(world: World) {
-        const { cw, ch, cols, rows, cellGlyph, palette } = this;
-        for (const rp of world.ripples) {
-            const age = world.time - rp.born;
-            const life = rippleLife(rp);
-            const fade = Math.pow(1 - age / life, 1.5) * rp.strength;
-            for (let ring = 0; ring < 2; ring++) {
-                const radius = Math.max(0, age - ring * 0.45) * RIPPLE_SPEED * (0.7 + 0.5 * rp.strength);
-                if (radius < 2) continue;
-                const band = cw * 0.6;
-                const c0 = Math.max(0, Math.floor((rp.x - radius - cw) / cw));
-                const c1 = Math.min(cols - 1, Math.floor((rp.x + radius + cw) / cw));
-                const r0 = Math.max(0, Math.floor((rp.y - radius - ch) / ch));
-                const r1 = Math.min(rows - 1, Math.floor((rp.y + radius + ch) / ch));
-                const alpha = fade * (ring === 0 ? 0.55 : 0.3);
-                for (let r = r0; r <= r1; r++) {
-                    for (let c = c0; c <= c1; c++) {
-                        const i = r * cols + c;
-                        if (cellGlyph[i]) continue;
-                        const dx = c * cw + cw / 2 - rp.x;
-                        const dy = r * ch + ch / 2 - rp.y;
-                        const d = Math.hypot(dx, dy);
-                        if (Math.abs(d - radius) > band) continue;
-                        const glyph = ring === 1 ? "." : lineGlyph(-dy, dx);
-                        this.glyphAt(i, glyph, palette.water, alpha);
-                    }
-                }
-            }
-        }
-    }
-
-    /** A bite flashes * over the dragon's mouth, settling to + then a dot as the splash takes over. */
+    /** A bite flashes * over the dragon's mouth, settling to + then a dot. */
     private drawBites(world: World) {
         const { palette } = this;
         for (const b of world.bites) {
@@ -695,24 +635,22 @@ export class DragonRenderer {
         }
     }
 
-    /** Pearls fall in (' then .), land as a glowing O with a splash, shimmer while floating, then dim to . as they sink. */
+    /** Pearls glow in (. then o), then hang as a shimmering O until eaten. */
     private drawPellets(world: World) {
         const { ctx, cellGlyph, palette, cw, ch, cols } = this;
         for (const p of world.pellets) {
             const age = world.time - p.born;
             if (!p.landed) {
-                const fall = age / p.landAt;
-                // Drawn a little above where it will land, closing in as it drops.
-                const i = this.cellIndex(p.x, p.y - (1 - fall) * ch * 1.5);
+                const grow = age / p.landAt;
+                const i = this.cellIndex(p.x, p.y);
                 if (i < 0 || cellGlyph[i]) continue;
-                this.glyphAt(i, fall < 0.5 ? "'" : ".", palette.pellet, palette.alpha * (0.5 + 0.4 * fall));
+                this.glyphAt(i, grow < 0.5 ? "." : "o", palette.pellet, palette.alpha * (0.5 + 0.4 * grow));
                 continue;
             }
             const i = this.cellIndex(p.x, p.y);
             if (i < 0 || cellGlyph[i]) continue;
-            const sink = smoothstep(PELLET_SINK, PELLET_LIFE, age);
             const bob = 0.8 + 0.2 * Math.sin(age * 3 + p.x);
-            const glow = palette.alpha * bob * (1 - 0.85 * sink);
+            const glow = palette.alpha * bob;
             // A soft round halo under the pearl, so it reads as a lit orb rather than a pellet.
             const cx = (i % cols) * cw + cw / 2;
             const cy = ((i / cols) | 0) * ch + ch / 2;
@@ -726,7 +664,7 @@ export class DragonRenderer {
                 ctx.arc(cx, cy, cw * r, 0, Math.PI * 2);
                 ctx.fill();
             }
-            this.glyphAt(i, sink > 0.55 ? "." : "O", palette.pellet, glow);
+            this.glyphAt(i, "O", palette.pellet, glow);
         }
     }
 }

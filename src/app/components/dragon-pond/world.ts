@@ -1,6 +1,5 @@
 export const TAU = Math.PI * 2;
 export const DRAGON_NODES = 40;
-export const RIPPLE_SPEED = 52;
 
 export const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
 const rand = (lo: number, hi: number) => lo + Math.random() * (hi - lo);
@@ -46,15 +45,12 @@ export interface Dragon {
     wander: number;
     /** How strongly this dragon swims over to the cursor. */
     curiosity: number;
-    /** 0.5 deep and dim to 1 just under the surface. */
+    /** 0.5 far off and hazy to 1 up close. */
     depth: number;
     depthTarget: number;
     depthMax: number;
     nextDive: number;
-    nextSurface: number;
-    /** When a dragon swimming near the surface next sends a small ring off its tail. */
-    nextWake: number;
-    /** 1 just after food hits the water nearby, fading: the dragon sprints and turns harder while it lasts. */
+    /** 1 just after a pearl appears nearby, fading: the dragon sprints and turns harder while it lasts. */
     rush: number;
     /** The pellet this dragon is going for. It sticks with it so a burst of clicks doesn't yank it around. */
     food: Pellet | null;
@@ -76,10 +72,10 @@ export interface Pellet {
     x: number;
     y: number;
     born: number;
-    /** Seconds after `born` that it hits the water; until then it's falling and dragons can't eat it. */
+    /** Seconds after `born` that it takes to glow in; until then dragons can't eat it. */
     landAt: number;
     landed: boolean;
-    /** Slow drift once it's floating. */
+    /** Slow drift once it's hanging in the air. */
     vx: number;
     vy: number;
 }
@@ -89,13 +85,6 @@ export interface Bite {
     x: number;
     y: number;
     born: number;
-}
-
-export interface Ripple {
-    x: number;
-    y: number;
-    born: number;
-    strength: number;
 }
 
 const push = { x: 0, y: 0 };
@@ -124,12 +113,9 @@ function repel(boxes: Box[], x: number, y: number, margin: number, out: { x: num
     return out;
 }
 
-export const PELLET_LIFE = 14;
 export const BITE_LIFE = 0.45;
 const RUSH_RANGE = 650;
 const FEED_CALM = 2;
-/** Uneaten pellets start to sink this many seconds in, fading out by PELLET_LIFE. */
-export const PELLET_SINK = 9;
 const STARTLE_SPEED = 1100;
 const MAX_PELLETS = 6;
 
@@ -142,7 +128,6 @@ export class World {
     bites: Bite[] = [];
     /** Moving the mouse to throw food isn't a threat, so swipes don't startle dragons for a moment after a throw. */
     private lastFeed = -Infinity;
-    ripples: Ripple[] = [];
     pointer = { x: 0, y: 0, speed: 0, active: false };
     /** Page content the dragons steer around, in canvas space. */
     avoid: Box[] = [];
@@ -159,7 +144,7 @@ export class World {
         const minSide = Math.min(W, H);
         const baseLength = clamp(minSide * 1.2, 380, 950);
         this.dragons = [];
-        // Two grown dragons and a young one that keeps to the deep water, for a sense of depth.
+        // Two grown dragons and a young one that keeps farther off, for a sense of depth.
         for (let i = 0; i < VARIETIES.length; i++) {
             const isYoung = i === VARIETIES.length - 1;
             const length = baseLength * (isYoung ? rand(0.4, 0.5) : rand(0.75, 1));
@@ -192,8 +177,6 @@ export class World {
                 depthTarget: rand(0.5, depthMax),
                 depthMax,
                 nextDive: rand(6, 18),
-                nextSurface: rand(3, 14),
-                nextWake: rand(0, 2),
                 beat: 0,
                 rush: 0,
                 food: null,
@@ -208,11 +191,10 @@ export class World {
         }
     }
 
-    /** A single pearl dropped at (x, y): it lands with a splash, then drifts and sinks unless a dragon takes it. */
+    /** A single pearl conjured at (x, y): it glows in, then drifts until a dragon takes it. */
     feed(x: number, y: number) {
         this.lastFeed = this.time;
-        this.ripples.push({ x, y, born: this.time, strength: 0.35 });
-        // A full pond takes no more pearls, rather than dropping old ones out from under dragons already going for them.
+        // A full sky takes no more pearls, rather than dropping old ones out from under dragons already going for them.
         if (this.pellets.length >= MAX_PELLETS) return;
         const a = rand(0, TAU);
         const drift = rand(2, 6);
@@ -232,13 +214,11 @@ export class World {
         this.pointer.speed *= Math.exp(-dt * 8);
         for (const k of this.dragons) this.stepDragon(k, dt);
         const t = this.time;
-        this.pellets = this.pellets.filter((p) => t - p.born < PELLET_LIFE);
         for (const p of this.pellets) {
             if (!p.landed) {
                 if (t - p.born < p.landAt) continue;
                 p.landed = true;
-                this.ripples.push({ x: p.x, y: p.y, born: t, strength: 0.1 });
-                // The splash is what dragons react to: every dragon in range turns and bolts for it at once.
+                // Its arrival is what dragons react to: every dragon in range turns and bolts for it at once.
                 for (const k of this.dragons) {
                     if (Math.hypot(k.nodes[0] - p.x, k.nodes[1] - p.y) < RUSH_RANGE) k.rush = 1;
                 }
@@ -250,7 +230,6 @@ export class World {
             p.x += p.vx * dt;
             p.y += p.vy * dt;
         }
-        this.ripples = this.ripples.filter((r) => t - r.born < rippleLife(r));
         this.bites = this.bites.filter((b) => t - b.born < BITE_LIFE);
     }
 
@@ -372,12 +351,6 @@ export class World {
         }
         const bursting = fleeing || chasing || time < k.burstUntil;
         k.beat += ((bursting ? 1 : 0) - k.beat) * Math.min(1, dt * 3);
-        // Tail beats near the surface push small rings out behind the dragon; gliding or deep dragons leave none.
-        if (k.beat > 0.6 && k.depth > 0.65 && time > k.nextWake) {
-            const tail = (DRAGON_NODES - 3) * 2;
-            this.ripples.push({ x: nodes[tail], y: nodes[tail + 1], born: time, strength: 0.25 + 0.2 * k.depth });
-            k.nextWake = time + rand(0.8, 1.6) / k.beat;
-        }
         k.rush = Math.max(0, k.rush - dt * 0.7);
         const cruise = 14 + L * 0.04;
         const target =
@@ -395,7 +368,7 @@ export class World {
         k.finPhase += dt * (1.6 + k.speed / 20);
         k.gulp += ((chasing && closing > 0.55 ? 1 : 0) - k.gulp) * Math.min(1, dt * 6);
 
-        // Dragons drift between the deep and the surface, and rise for food.
+        // Dragons drift nearer and farther, and come close for food.
         if (time > k.nextDive) {
             k.depthTarget = rand(0.5, k.depthMax);
             k.nextDive = time + rand(8, 20);
@@ -423,14 +396,7 @@ export class World {
         this.pellets = this.pellets.filter(
             (p) => !p.landed || (p.x - nodes[0]) ** 2 + (p.y - nodes[1]) ** 2 > mouthR * mouthR
         );
-        if (this.pellets.length < before) {
-            this.ripples.push({ x: nodes[0], y: nodes[1], born: time, strength: 0.6 });
-            this.bites.push({ x: nodes[0], y: nodes[1], born: time });
-            k.nextSurface = time + rand(6, 16);
-        } else if (time > k.nextSurface) {
-            this.ripples.push({ x: nodes[0], y: nodes[1], born: time, strength: 0.3 });
-            k.nextSurface = time + rand(8, 20);
-        }
+        if (this.pellets.length < before) this.bites.push({ x: nodes[0], y: nodes[1], born: time });
     }
 
     /** Keep the current target while it lasts; only switch for a pellet less than half as far away. */
@@ -457,8 +423,4 @@ export class World {
         }
         return best;
     }
-}
-
-export function rippleLife(r: Ripple) {
-    return 2.2 + r.strength * 1.6;
 }

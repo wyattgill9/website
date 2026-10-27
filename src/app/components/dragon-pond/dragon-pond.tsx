@@ -10,12 +10,27 @@ import { World, type Box } from "./world";
 const STEP = 1 / 60;
 const MAX_STEPS = 4;
 const INTERACTIVE = "a, button, input, textarea, select, label, [role='button'], [data-dragon-ignore]";
-// Content over the pond carries this attribute; dragons steer around it and fade beneath it.
+// Content over the sky carries this attribute; dragons steer around it and fade beneath it.
 const AVOID_TARGETS = "[data-dragon-avoid]";
 // Re-measure the content boxes this often, in frames, to follow layout shifts and entrance animations.
 const MEASURE_EVERY_FRAMES = 30;
 // Content boxes closer than this merge, so dragons aren't squeezed into the slot between them.
 const MERGE_GAP_PX = 160;
+
+// The text and icons themselves: element boxes run on across padding and the empty space beside short lines.
+function contentRects(el: Element) {
+    const rects: DOMRect[] = [];
+    const range = document.createRange();
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    for (let n: Node | null = walker.currentNode; n; n = walker.nextNode()) {
+        if (n instanceof SVGSVGElement || n instanceof HTMLImageElement) rects.push(n.getBoundingClientRect());
+        else if (n.nodeType === Node.TEXT_NODE && n.textContent?.trim()) {
+            range.selectNodeContents(n);
+            rects.push(...range.getClientRects());
+        }
+    }
+    return rects.filter((r) => r.width > 0 && r.height > 0);
+}
 
 function mergeNearby(boxes: Box[]) {
     const merged: Box[] = [];
@@ -103,15 +118,14 @@ class PondEngine {
 
     private measureContent() {
         const origin = this.canvas.getBoundingClientRect();
-        const measured = Array.from(document.querySelectorAll(AVOID_TARGETS), (el) => {
-            const b = el.getBoundingClientRect();
-            return {
+        const measured = Array.from(document.querySelectorAll(AVOID_TARGETS)).flatMap((el) =>
+            contentRects(el).map((b) => ({
                 left: b.left - origin.left,
                 top: b.top - origin.top,
                 right: b.right - origin.left,
                 bottom: b.bottom - origin.top,
-            };
-        });
+            }))
+        );
         const boxes = mergeNearby(measured);
         this.renderer.setDimBoxes(boxes);
         this.world.avoid = boxes;
