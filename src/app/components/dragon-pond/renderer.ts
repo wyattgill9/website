@@ -29,6 +29,17 @@ type Rgb = [number, number, number];
 // How visible a dragon stays while it flies under page content.
 const DIM_UNDER_CONTENT = 0.15;
 
+// Cloud glyphs from a faint wisp to a thick, moonlit rim.
+const CLOUD_GLYPHS = ".:-~=+*";
+/** Wind speed, px/s. */
+const WIND = 7;
+/** Fractal noise below this is clear sky. */
+const CLOUD_COVER = 0.52;
+/** How much of a far-off dragon the thickest cloud hides. */
+const CLOUD_VEIL = 0.85;
+/** A dragon cell this veiled shows the cloud's glyph instead of its own. */
+const VEIL_SWAP = 0.5;
+
 interface Palette {
     /** Page background, which tiles are mixed toward. */
     bg: Rgb;
@@ -36,8 +47,12 @@ interface Palette {
     /** Antlers: bone, whatever the dragon's colour. */
     fin: Rgb;
     eye: Rgb;
-    /** Cloud wisps trailing behind the dragons. */
-    water: Rgb;
+    /** Clouds from their shadowed undersides to their lit tops. */
+    cloudShade: Rgb;
+    cloudLit: Rgb;
+    /** Alpha at full thickness of the soft wash that gives clouds their body, and of the glyphs drawn over it. */
+    cloudWash: number;
+    cloudInk: number;
     pellet: Rgb;
     alpha: number;
     /** How much a far-off dragon fades into the haze, as the alpha it keeps at its farthest. */
@@ -55,7 +70,11 @@ const DARK: Palette = {
     white: [236, 228, 218],
     fin: [214, 206, 198],
     eye: [20, 20, 26],
-    water: [255, 247, 240],
+    // Moonlit: silver tops over indigo shadow.
+    cloudShade: [84, 80, 120],
+    cloudLit: [240, 238, 252],
+    cloudWash: 0.22,
+    cloudInk: 0.6,
     pellet: [250, 236, 196],
     alpha: 0.8,
     depthFloor: 0.4,
@@ -95,7 +114,11 @@ const LIGHT: Palette = {
     white: [112, 108, 104],
     fin: [138, 132, 126],
     eye: [24, 22, 26],
-    water: [38, 37, 35],
+    // Ink wash: pale tops, deepening to grey where the cloud turns away from the light.
+    cloudShade: [118, 122, 140],
+    cloudLit: [214, 214, 218],
+    cloudWash: 0.3,
+    cloudInk: 0.5,
     pellet: [176, 128, 40],
     alpha: 0.9,
     depthFloor: 0.55,
@@ -191,6 +214,17 @@ export class DragonRenderer {
     private cellTile = new Uint32Array(0);
     private cellTileAlpha = new Float32Array(0);
     private cellDim = new Float32Array(0);
+    /** How much cloud hangs between the viewer and the dragon drawn in each cell. */
+    private cellVeil = new Float32Array(0);
+    /** Cloud thickness per cell. The dragons' trails are folded in once the dragons are drawn. */
+    private cloud = new Float32Array(0);
+    private cloudLight = new Float32Array(0);
+    /** One pixel per cell, scaled up smoothly behind the glyphs. */
+    private wash = new OffscreenCanvas(1, 1);
+    private washCtx = this.wash.getContext("2d")!;
+    private washPixels = new ImageData(1, 1);
+    /** Width of the base noise octave, px. */
+    private cloudUnit = 500;
 
     private spine = new Float32Array(DRAGON_NODES * 2);
     private arc = new Float32Array(DRAGON_NODES);
@@ -235,6 +269,14 @@ export class DragonRenderer {
         this.cellTile = new Uint32Array(n);
         this.cellTileAlpha = new Float32Array(n);
         this.cellDim = new Float32Array(n).fill(1);
+        this.cellVeil = new Float32Array(n);
+        this.cloud = new Float32Array(n);
+        this.cloudLight = new Float32Array(n);
+        this.wash.width = this.cols;
+        this.wash.height = this.rows;
+        this.washPixels = new ImageData(this.cols, this.rows);
+        // Banks a few hundred px across, so a phone still sees sky between them.
+        this.cloudUnit = clamp(width * 0.4, 260, 560);
     }
 
     /** Fade dragons under these canvas-space boxes, easing back in over a few cells around them. */
@@ -268,10 +310,12 @@ export class DragonRenderer {
 
         this.cellGlyph.fill(0);
         this.cellTileAlpha.fill(0);
+        this.formClouds(world.time);
         // Farther dragons first, so the near ones fly over them.
         for (const k of [...world.dragons].sort((a, b) => a.depth - b.depth)) this.rasterizeDragon(k, world.time);
         this.depositWake(world);
         this.diffuse(dt);
+        this.shadeSky();
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -280,9 +324,10 @@ export class DragonRenderer {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
 
-        this.drawWake();
-        this.drawPellets(world);
+        ctx.drawImage(this.wash, 0, 0, this.cols * this.cw, this.rows * this.ch);
         this.drawCells();
+        this.drawClouds(world);
+        this.drawPellets(world);
         this.drawBites(world);
         ctx.globalAlpha = 1;
     }
@@ -413,6 +458,8 @@ export class DragonRenderer {
         const diag = Math.hypot(cw, ch);
         // Up close a dragon is brighter; far off it fades into the haze.
         const dim = palette.alpha * (palette.depthFloor + (1 - palette.depthFloor) * k.depth);
+        // Far-off dragons slip behind the clouds; near ones fly in front of them.
+        const far = clamp((0.85 - k.depth) / 0.3, 0, 1) * CLOUD_VEIL;
         const hit = this.hit;
 
         for (let r = r0; r <= r1; r++) {
@@ -551,12 +598,15 @@ export class DragonRenderer {
                         }
                     }
                 }
+                const veil = this.cloud[i] * far;
+                if (veil >= VEIL_SWAP) glyph = " ";
                 if (glyph === " " && tileAlpha === 0) continue;
                 cellTile[i] = tile ? packRgb(tile) : 0;
-                cellTileAlpha[i] = tileAlpha;
+                cellTileAlpha[i] = tileAlpha * (1 - veil);
                 cellGlyph[i] = glyph.charCodeAt(0);
                 cellColor[i] = packRgb(rgb);
-                cellAlpha[i] = alpha;
+                cellAlpha[i] = alpha * (1 - veil);
+                this.cellVeil[i] = veil;
             }
         }
     }
@@ -614,12 +664,63 @@ export class DragonRenderer {
         this.energyTmp = energy;
     }
 
-    private drawWake() {
-        const { energy, cellGlyph, palette } = this;
-        for (let i = 0; i < energy.length; i++) {
-            const e = energy[i];
-            if (e < 0.22 || cellGlyph[i]) continue;
-            this.glyphAt(i, e > 0.5 ? "~" : ".", palette.water, Math.min(1, (e - 0.22) * 1.4) * 0.35);
+    /** Fractal noise stretched wide and drifting downwind. Each finer octave also creeps on its own, so the banks churn. */
+    private formClouds(t: number) {
+        const { cols, rows, cw, ch, cloud, cloudUnit } = this;
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                let x = ((c + 0.5) * cw - t * WIND) / cloudUnit;
+                let y = ((r + 0.5) * ch) / (cloudUnit * 0.6);
+                let n = 0;
+                for (let o = 0, amp = 0.5; o < 4; o++, amp *= 0.5) {
+                    n += amp * valueNoise(x, y, 40 + o);
+                    // Turn each octave so the noise lattice doesn't line up into streaks.
+                    const nx = (0.8 * x - 0.6 * y) * 2.02 + t * 0.012;
+                    y = (0.6 * x + 0.8 * y) * 2.02 - t * 0.008;
+                    x = nx;
+                }
+                cloud[r * cols + c] = smoothstep(CLOUD_COVER, CLOUD_COVER + 0.2, n / 0.9375);
+            }
+        }
+    }
+
+    /** Fold the trails into the clouds, then light them from the top-left: the more cloud between a cell and the light, the darker it is. */
+    private shadeSky() {
+        const { cols, rows, cloud, cloudLight, energy, cellDim, palette } = this;
+        const { cloudShade: lo, cloudLit: hi } = palette;
+        const px = this.washPixels.data;
+        for (let i = 0; i < cloud.length; i++) cloud[i] += smoothstep(0.15, 0.9, energy[i]) * 0.6 * (1 - cloud[i]);
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const i = r * cols + c;
+                let occ = 0;
+                for (let k = 1; k <= 7; k += 3) if (r >= k && c >= k >> 1) occ += cloud[i - k * cols - (k >> 1)];
+                const light = Math.exp(-0.75 * occ);
+                cloudLight[i] = light;
+                px[i * 4] = lo[0] + (hi[0] - lo[0]) * light;
+                px[i * 4 + 1] = lo[1] + (hi[1] - lo[1]) * light;
+                px[i * 4 + 2] = lo[2] + (hi[2] - lo[2]) * light;
+                px[i * 4 + 3] = cloud[i] * palette.cloudWash * cellDim[i] * 255;
+            }
+        }
+        this.washCtx.putImageData(this.washPixels, 0, 0);
+    }
+
+    /** Glyphs over the wash: crowded along the lit rims, a scatter in the shadowed bellies. Drawn over a dragon only once it's lost in the cloud. */
+    private drawClouds(world: World) {
+        const { cols, cloud, cloudLight, cellGlyph, cellVeil, cellDim, palette } = this;
+        const pearls = world.pellets.map((p) => this.cellIndex(p.x, p.y));
+        for (let i = 0; i < cloud.length; i++) {
+            const c = i % cols;
+            const r = (i / cols) | 0;
+            const glow = cloud[i] * (0.25 + 0.75 * cloudLight[i]);
+            if (hash3(c, r, 9) > glow * 1.8) continue;
+            if ((cellGlyph[i] && cellVeil[i] < VEIL_SWAP) || pearls.includes(i)) continue;
+            const g = clamp(Math.floor(glow * CLOUD_GLYPHS.length + hash3(c, r, 10) - 0.5), 0, CLOUD_GLYPHS.length - 1);
+            // Quantised, so the style cache stays small.
+            const light = Math.round(cloudLight[i] * 12) / 12;
+            const rgb = mix(palette.cloudShade, palette.cloudLit, light);
+            this.glyphAt(i, CLOUD_GLYPHS[g], rgb, palette.cloudInk * (0.25 + 0.75 * glow) * cellDim[i]);
         }
     }
 
