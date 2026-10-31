@@ -1,10 +1,16 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
+import Image, { type StaticImageData } from "next/image";
 import { Fragment, type ReactNode } from "react";
 import Container from "../components/container";
 import InlineMd from "../components/inline-md";
 import SiteNav from "../components/site-nav";
+import eightySix from "./covers/86.jpg";
+import fate from "./covers/fate.jpg";
+import reZero from "./covers/re-zero.jpg";
+import tokyoGhoul from "./covers/tokyo-ghoul.jpg";
+import violetEvergarden from "./covers/violet-evergarden.jpg";
 import { GENERATED } from "./sync";
 
 // Re-render (and re-fetch the MyAnimeList and Letterboxd lists) at most once a day.
@@ -76,6 +82,22 @@ const FAVORITES: { label: string; profile?: [string, string]; items: string[] }[
     { label: "Game", items: ["NieR: Automata"] },
 ];
 
+/** Best first. */
+const TOP: [string, StaticImageData][] = [
+    ["Fate/stay night", fate],
+    ["86", eightySix],
+    ["Re:Zero", reZero],
+    ["Tokyo Ghoul", tokyoGhoul],
+    ["Violet Evergarden", violetEvergarden],
+];
+
+/** Where the generated lists sync from, linked so a reader can tell they're watchlists. */
+const SOURCES: Record<string, [string, string]> = {
+    Film: ["letterboxd", "https://letterboxd.com/Wyatt_G/watchlist/"],
+    Anime: ["myanimelist", "https://myanimelist.net/animelist/raiinyzen?status=6"],
+    "Manga / LN": ["myanimelist", "https://myanimelist.net/mangalist/raiinyzen?status=6"],
+};
+
 // A fixed label column shared by both sections, so their values line up.
 const ROWS = "grid grid-cols-[5.5rem_minmax(0,1fr)] gap-y-2";
 
@@ -91,6 +113,36 @@ export default async function Shelf() {
             <SiteNav />
             <Container as="main" className="pb-24 pt-28 font-geistMono text-[14px] leading-[1.7]">
                 <h1 className="mb-12 text-[15px]">Shelf</h1>
+                <section className="mb-16">
+                    <Label>top 5</Label>
+                    {/* Hovering one cover steps the rest back, the same move the home page makes for citations. */}
+                    <ol className="group grid grid-cols-5 gap-4">
+                        {TOP.map(([title, cover], i) => (
+                            <li
+                                key={title}
+                                className="transition-opacity duration-150 hover:!opacity-100 group-hover:opacity-[.35]"
+                            >
+                                <div className="relative aspect-[2/3] overflow-hidden rounded-[3px]">
+                                    <Image
+                                        src={cover}
+                                        alt={title}
+                                        placeholder="blur"
+                                        sizes="(min-width: 1024px) 12vw, 20vw"
+                                        className="h-full w-full object-cover"
+                                    />
+                                    {/* A faint hairline so dark covers don't melt into the background. */}
+                                    <div className="pointer-events-none absolute inset-0 rounded-[3px] ring-1 ring-inset ring-[color-mix(in_srgb,var(--foreground-color)_10%,transparent)]" />
+                                </div>
+                                <div className="mt-3 text-[12px] leading-[1.5]">
+                                    <span className="mr-2 tabular-nums opacity-40">
+                                        {String(i + 1).padStart(2, "0")}
+                                    </span>
+                                    {title}
+                                </div>
+                            </li>
+                        ))}
+                    </ol>
+                </section>
                 <div className="flex flex-col gap-14 lg:flex-row lg:gap-16">
                     {/* Pinned while the lists scroll; scrolls itself only if the window is too short to hold it. */}
                     <aside className="flex shrink-0 flex-col gap-10 lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:w-80 lg:self-start lg:overflow-y-auto">
@@ -150,6 +202,16 @@ export default async function Shelf() {
                                     </span>
                                     {heading}
                                     <span className="ml-2 tabular-nums opacity-60">{groups.flat().length}</span>
+                                    {SOURCES[heading] && (
+                                        <a
+                                            href={SOURCES[heading][1]}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="ml-3 opacity-60 underline-offset-[5px] hover:underline"
+                                        >
+                                            via {SOURCES[heading][0]} ↗
+                                        </a>
+                                    )}
                                 </summary>
                                 <div className="flex flex-col gap-4">
                                     {groups.map((group, i) => (
