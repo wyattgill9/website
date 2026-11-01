@@ -8,6 +8,8 @@ const SOCIALS = [
     { label: "github", href: "https://github.com/wyattgill9" },
     { label: "linkedin", href: "https://www.linkedin.com/in/wyatt-gill-17380b323/" },
     { label: "x", href: "https://x.com/WyattGill_" },
+    { label: "steam", href: "https://steamcommunity.com/id/rainyzen" },
+    { label: "spotify", href: "https://open.spotify.com/user/31m3ssoq4vnipec7zglk2quiauaq" },
     { label: "email", href: "mailto:wyattgill01@outlook.com" },
 ];
 
