@@ -102,7 +102,9 @@ const Label = ({ children }: { children: ReactNode }) => (
 
 /** A currently or favorites title; hovering it shows its cover. */
 const Title = ({ title }: { title: string }) => (
-    <div>{COVERS[title] ? <CoverHover cover={COVERS[title]}>{title}</CoverHover> : title}</div>
+    <span className="whitespace-nowrap">
+        {COVERS[title] ? <CoverHover cover={COVERS[title]}>{title}</CoverHover> : title}
+    </span>
 );
 
 export default async function ShelfPage({ secret = false }: { secret?: boolean }) {
@@ -156,7 +158,9 @@ export default async function ShelfPage({ secret = false }: { secret?: boolean }
                                         <dt className="opacity-50">{label}</dt>
                                         <dd>
                                             {items.map((title) => (
-                                                <Title key={title} title={title} />
+                                                <div key={title}>
+                                                    <Title title={title} />
+                                                </div>
                                             ))}
                                         </dd>
                                     </Fragment>
@@ -185,8 +189,15 @@ export default async function ShelfPage({ secret = false }: { secret?: boolean }
                                             )}
                                         </dt>
                                         <dd>
-                                            {items.map((title) => (
-                                                <Title key={title} title={title} />
+                                            {/* Each dot stays with the title before it, so a wrapped line never starts with one. */}
+                                            {items.map((title, i) => (
+                                                <Fragment key={title}>
+                                                    {i > 0 && " "}
+                                                    <span className="whitespace-nowrap">
+                                                        <Title title={title} />
+                                                        {i < items.length - 1 && <span className="opacity-40"> ·</span>}
+                                                    </span>
+                                                </Fragment>
                                             ))}
                                         </dd>
                                     </Fragment>
