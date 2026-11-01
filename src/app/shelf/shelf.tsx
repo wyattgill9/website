@@ -115,7 +115,7 @@ export default async function ShelfPage({ secret = false }: { secret?: boolean }
                 {secret && (
                     <section className="mb-16">
                         <Label>top 5</Label>
-                        {/* Hovering one cover steps the rest back, the same move the home page makes for citations. */}
+                        {/* Hovering one cover steps the rest back. */}
                         <ol className="group grid grid-cols-5 gap-4">
                             {TOP.map(([title, key], i) => (
                                 <li
@@ -192,7 +192,9 @@ export default async function ShelfPage({ secret = false }: { secret?: boolean }
                                                     {i > 0 && " "}
                                                     <span className="inline-block">
                                                         <Title title={title} />
-                                                        {i < items.length - 1 && <span className="opacity-40">{" ·"}</span>}
+                                                        {i < items.length - 1 && (
+                                                            <span className="opacity-40">{" ·"}</span>
+                                                        )}
                                                     </span>
                                                 </Fragment>
                                             ))}
