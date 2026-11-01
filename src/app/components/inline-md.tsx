@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
+// Faint at rest so a line with several links doesn't read as striped; full strength on hover.
 export const LINK =
-    "underline decoration-[color-mix(in_srgb,var(--foreground-color)_35%,transparent)] decoration-1 underline-offset-[5px] hover:decoration-foreground";
+    "underline decoration-[color-mix(in_srgb,var(--foreground-color)_16%,transparent)] decoration-1 underline-offset-[5px] transition-[text-decoration-color] duration-150 hover:decoration-foreground";
 
 // Prettier writes italics in markdown files as _x_, sync.ts writes *x*; an underscore inside a word (kv_store) isn't one.
 const INLINE = /\*\*(.+?)\*\*|\*(.+?)\*|(?<!\w)_(.+?)_(?!\w)|`(.+?)`|\[(.+?)\]\((.+?)\)/g;
