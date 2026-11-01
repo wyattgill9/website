@@ -34,13 +34,12 @@ export default function Quotes() {
                 <p className="mb-20 mt-2 text-[12px] opacity-50">
                     lines that stuck <span className="ml-1.5 tabular-nums opacity-60">{quotes.length}</span>
                 </p>
-                {/* Hovering one quote steps the rest back, like the shelf's top 5. */}
-                <ol className="group flex max-w-[44rem] flex-col gap-20">
+                <ol className="flex max-w-[44rem] flex-col gap-20">
                     {quotes.map(({ text, by }, i) => (
                         <li
                             key={text.join()}
                             style={{ animationDelay: `${i * 90}ms` }}
-                            className="grid grid-cols-[2.5rem_minmax(0,1fr)] fill-mode-both transition-opacity duration-300 hover:!opacity-100 group-hover:opacity-30 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-700 lg:grid-cols-[4rem_minmax(0,1fr)]"
+                            className="grid grid-cols-[2.5rem_minmax(0,1fr)] fill-mode-backwards motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-700 lg:grid-cols-[4rem_minmax(0,1fr)]"
                         >
                             <span className="pt-[0.35em] text-[12px] tabular-nums opacity-40">
                                 {String(i + 1).padStart(2, "0")}
