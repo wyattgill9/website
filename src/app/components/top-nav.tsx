@@ -4,15 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import Container from "./container";
+import { LINKS } from "./links";
 import ThemeIcon from "./theme-icon";
-
-// tmux windows: the home page is the shell, fish.
-export const LINKS = [
-    { label: "fish", href: "/" },
-    { label: "projects", href: "/projects" },
-    { label: "shelf", href: "/shelf" },
-    // { label: "blog", href: "/blog" },
-];
 
 const ITEM = "transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 outline-none";
 
