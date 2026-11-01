@@ -17,7 +17,11 @@ export const LINKS = [
 const ITEM = "transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 outline-none";
 
 /** A tmux status line: session name, numbered windows with `*` on the current one, theme toggle on the right. */
-export default function TopNav() {
+/**
+ * `solid` gives the bar the page's background, so text scrolling up goes under it instead of through it.
+ * The home page leaves it off, so the sky shows behind the nav.
+ */
+export default function TopNav({ solid = false }: { solid?: boolean }) {
     const pathname = usePathname();
     const { resolvedTheme, setTheme } = useTheme();
     // A nested page still counts as being in its section.
@@ -28,7 +32,7 @@ export default function TopNav() {
             as="nav"
             data-dragon-avoid
             aria-label="Main"
-            className="fixed inset-x-0 top-0 z-30 flex items-center gap-6 pt-8 font-geistMono text-[13px] lowercase text-foreground transition-colors duration-200"
+            className={`fixed inset-x-0 top-0 z-30 flex items-center gap-6 pt-8 font-geistMono text-[13px] lowercase text-foreground transition-colors duration-200 ${solid ? "bg-background pb-6" : ""}`}
         >
             <span className="opacity-50">[wyatt]</span>
             {LINKS.map(({ label, href }, i) => (

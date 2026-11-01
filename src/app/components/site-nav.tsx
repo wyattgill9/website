@@ -8,5 +8,5 @@ import TopNav from "./top-nav";
 export default function SiteNav() {
     const { isMobile } = useGlobal();
     if (isMobile === null) return null;
-    return isMobile ? <MobileNav /> : <TopNav />;
+    return isMobile ? <MobileNav /> : <TopNav solid />;
 }
