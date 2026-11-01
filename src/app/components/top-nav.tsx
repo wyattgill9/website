@@ -16,8 +16,10 @@ export const LINKS = [
 
 const ITEM = "transition-opacity duration-150 hover:opacity-100 focus-visible:opacity-100 outline-none";
 
-/** A tmux status line: session name, numbered windows with `*` on the current one, theme toggle on the right. */
 /**
+ * A tmux status line: session name, numbered windows with `*` on the current one, theme toggle on the right.
+ * The same bar at every size; it only tightens on phones, and drops the session name on the narrowest.
+ *
  * `solid` gives the bar the page's background, so text scrolling up goes under it instead of through it.
  * The home page leaves it off, so the sky shows behind the nav.
  */
@@ -32,9 +34,9 @@ export default function TopNav({ solid = false }: { solid?: boolean }) {
             as="nav"
             data-dragon-avoid
             aria-label="Main"
-            className={`fixed inset-x-0 top-0 z-30 flex items-center gap-6 pt-8 font-geistMono text-[13px] lowercase text-foreground transition-colors duration-200 ${solid ? "bg-background pb-6" : ""}`}
+            className={`fixed inset-x-0 top-0 z-30 flex items-center gap-4 pt-6 font-geistMono text-[13px] lowercase text-foreground transition-colors duration-200 lg:gap-6 lg:pt-8 ${solid ? "bg-background pb-5 lg:pb-6" : ""}`}
         >
-            <span className="opacity-50">[wyatt]</span>
+            <span className="opacity-50 max-[374px]:hidden">[wyatt]</span>
             {LINKS.map(({ label, href }, i) => (
                 <Link
                     key={href}

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Container from "../components/container";
 import InlineMd from "../components/inline-md";
-import SiteNav from "../components/site-nav";
+import TopNav from "../components/top-nav";
 
 // The old projects.html was noindex; kept that way until it's ready to be found.
 export const metadata: Metadata = { title: "Projects", robots: { index: false } };
@@ -155,14 +155,7 @@ const Entry = ({ title, dates, langs, note, metric, bullets }: Project) => (
         {(dates || langs || note) && (
             <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px]">
                 {dates && <span className="tabular-nums opacity-50">{dates}</span>}
-                {langs?.map((lang) => (
-                    <span
-                        key={lang}
-                        className="rounded bg-[color-mix(in_srgb,var(--foreground-color)_8%,transparent)] px-1.5 opacity-70"
-                    >
-                        {lang}
-                    </span>
-                ))}
+                {langs && <span className="opacity-70">{langs.join(" · ")}</span>}
                 {note && (
                     <span className="opacity-50">
                         <InlineMd text={note} />
@@ -188,7 +181,7 @@ const Entry = ({ title, dates, langs, note, metric, bullets }: Project) => (
 export default function Projects() {
     return (
         <div className="min-h-screen w-full bg-background text-foreground">
-            <SiteNav />
+            <TopNav solid />
             <Container as="main" className="pb-24 pt-28 font-geistMono text-[14px] leading-[1.7]">
                 <h1 className="text-[15px]">Projects</h1>
                 <nav aria-label="Sections" className="mb-14 mt-2 flex flex-wrap gap-x-4 text-[12px]">

@@ -2,7 +2,6 @@
 import React, { useEffect } from "react";
 import { useGlobal } from "../context-providers/global-provider";
 
-import MobileNav from "./components/mobile-nav";
 import FrontPage from "./components/front-page";
 import DragonPond from "./components/dragon-pond/dragon-pond";
 import TopNav from "./components/top-nav";
@@ -30,7 +29,7 @@ export default function Home() {
             className="relative h-[100dvh] w-full overflow-hidden bg-background transition-colors duration-300"
         >
             <DragonPond className="absolute inset-0 h-full w-full" />
-            {isMobile ? <MobileNav /> : <TopNav />}
+            <TopNav />
             <main className="relative z-20 flex h-full flex-col">
                 <FrontPage />
             </main>

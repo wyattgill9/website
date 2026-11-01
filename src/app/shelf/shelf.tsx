@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Fragment, type ReactNode } from "react";
 import Container from "../components/container";
 import InlineMd from "../components/inline-md";
-import SiteNav from "../components/site-nav";
+import TopNav from "../components/top-nav";
 import CoverHover from "./cover-hover";
 import { COVERS } from "./covers";
 import { GENERATED } from "./sync";
@@ -112,7 +112,7 @@ export default async function ShelfPage({ secret = false }: { secret?: boolean }
 
     return (
         <div className="min-h-screen w-full bg-background text-foreground">
-            <SiteNav />
+            <TopNav solid />
             <Container as="main" className="pb-24 pt-28 font-geistMono text-[14px] leading-[1.7]">
                 <h1 className="mb-12 text-[15px]">Shelf</h1>
                 {secret && (
