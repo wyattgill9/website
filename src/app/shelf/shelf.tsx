@@ -101,11 +101,8 @@ const Label = ({ children }: { children: ReactNode }) => (
 );
 
 /** A currently or favorites title; hovering it shows its cover. */
-const Title = ({ title }: { title: string }) => (
-    <span className="whitespace-nowrap">
-        {COVERS[title] ? <CoverHover cover={COVERS[title]}>{title}</CoverHover> : title}
-    </span>
-);
+const Title = ({ title }: { title: string }) =>
+    COVERS[title] ? <CoverHover cover={COVERS[title]}>{title}</CoverHover> : <>{title}</>;
 
 export default async function ShelfPage({ secret = false }: { secret?: boolean }) {
     const { sections, links } = await load();
@@ -189,13 +186,13 @@ export default async function ShelfPage({ secret = false }: { secret?: boolean }
                                             )}
                                         </dt>
                                         <dd>
-                                            {/* Each dot stays with the title before it, so a wrapped line never starts with one. */}
+                                            {/* Each title wraps to the next line whole, and only breaks inside if it's wider than the column (nowrap made the aside scroll sideways). The dot stays with its title. */}
                                             {items.map((title, i) => (
                                                 <Fragment key={title}>
                                                     {i > 0 && " "}
-                                                    <span className="whitespace-nowrap">
+                                                    <span className="inline-block">
                                                         <Title title={title} />
-                                                        {i < items.length - 1 && <span className="opacity-40"> ·</span>}
+                                                        {i < items.length - 1 && <span className="opacity-40">{" ·"}</span>}
                                                     </span>
                                                 </Fragment>
                                             ))}
