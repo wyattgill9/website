@@ -1,7 +1,6 @@
 "use client";
 import { motion } from "motion/react";
 import { useGlobal } from "../../context-providers/global-provider";
-import Cited from "./citation";
 import Container from "./container";
 import { SOURCES } from "../data/sources";
 
@@ -78,22 +77,22 @@ const desktopPage = () => {
             </motion.blockquote>
             <motion.div
                 data-dragon-avoid
-                className="cited-prose max-w-[54rem] font-geistMono text-[15px] leading-[max(22px,3vh)]"
+                className="max-w-[54rem] font-geistMono text-[15px] leading-[max(22px,3vh)]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3, delay: 0.2 }}
             >
                 <h1>Wyatt Gill.</h1>
                 <p>
-                    Systems engineer in San Francisco, most recently @ <Cited source="ix">ix.dev</Cited>.
+                    Systems engineer in San Francisco, most recently @ <Mention source="ix">ix.dev</Mention>.
                 </p>
                 <p>
-                    <Cited source="rust">Rust</Cited> and <Cited source="cpp">C++</Cited> on{" "}
-                    <Cited source="nixos">NixOS</Cited>, with <Cited source="helix">Helix</Cited> +{" "}
-                    <Cited source="tmux">tmux</Cited>.
+                    <Mention source="rust">Rust</Mention> and <Mention source="cpp">C++</Mention> on{" "}
+                    <Mention source="nixos">NixOS</Mention>, with <Mention source="helix">Helix</Mention> +{" "}
+                    <Mention source="tmux">tmux</Mention>.
                 </p>
                 <p>
-                    Favorite paper: <Cited source="raft">Raft</Cited>. More on my <Cited source="shelf">shelf</Cited>.
+                    Favorite paper: <Mention source="raft">Raft</Mention>.
                 </p>
                 <Socials className="mt-[1.5vh]" />
                 <Credit className="mt-[1vh]" />
@@ -102,9 +101,9 @@ const desktopPage = () => {
     );
 };
 
-// Hover cards need a pointer, so on touch the mentions link straight to each site.
-const MobileLink = ({ source, children }: { source: string; children: React.ReactNode }) => (
-    <a href={SOURCES[source].href} target="_blank" rel="noopener noreferrer" className={UNDERLINE}>
+/** A mention in the bio: an underlined link straight to its site. */
+const Mention = ({ source, children }: { source: string; children: React.ReactNode }) => (
+    <a href={SOURCES[source]} target="_blank" rel="noopener noreferrer" className={UNDERLINE}>
         {children}
     </a>
 );
@@ -134,15 +133,15 @@ const mobilePage = () => {
             >
                 <h1>Wyatt Gill.</h1>
                 <p>
-                    Systems engineer in San Francisco, most recently @ <MobileLink source="ix">ix.dev</MobileLink>.
+                    Systems engineer in San Francisco, most recently @ <Mention source="ix">ix.dev</Mention>.
                 </p>
                 <p>
-                    <MobileLink source="rust">Rust</MobileLink> and <MobileLink source="cpp">C++</MobileLink> on{" "}
-                    <MobileLink source="nixos">NixOS</MobileLink>, with <MobileLink source="helix">Helix</MobileLink> +{" "}
-                    <MobileLink source="tmux">tmux</MobileLink>.
+                    <Mention source="rust">Rust</Mention> and <Mention source="cpp">C++</Mention> on{" "}
+                    <Mention source="nixos">NixOS</Mention>, with <Mention source="helix">Helix</Mention> +{" "}
+                    <Mention source="tmux">tmux</Mention>.
                 </p>
                 <p>
-                    Favorite paper: <MobileLink source="raft">Raft</MobileLink>.
+                    Favorite paper: <Mention source="raft">Raft</Mention>.
                 </p>
                 <Socials className="mt-2" />
                 <Credit className="mt-1" />
