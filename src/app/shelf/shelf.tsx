@@ -10,8 +10,7 @@ import { COVERS } from "./covers";
 import { GENERATED } from "./sync";
 
 /*
- * The shelf, shared by /shelf and /shelf/secret. The secret one adds a top 5 of covers above the lists
- * and links the synced lists to their watchlists.
+ * The shelf, shared by /shelf and /shelf/secret. The secret one adds a top 5 of covers above the lists.
  */
 
 /** A section of shelf.md: a `#` heading, then groups of `* ` items split by blank lines. */
@@ -196,45 +195,49 @@ export default async function ShelfPage({ secret = false }: { secret?: boolean }
                         </section>
                     </aside>
 
-                    <div className="flex min-w-0 flex-1 flex-col gap-8">
-                        {sections.map(({ heading, groups }) => (
-                            <details key={heading} open className="group">
-                                <summary className="mb-3 cursor-pointer list-none text-[12px] lowercase tracking-[0.04em] opacity-50 transition-opacity hover:opacity-100 [&::-webkit-details-marker]:hidden">
-                                    <span className="mr-2 inline-block transition-transform group-open:rotate-90">
-                                        ›
-                                    </span>
-                                    {heading}
-                                    <span className="ml-2 tabular-nums opacity-60">{groups.flat().length}</span>
-                                    {secret && SOURCES[heading] && (
-                                        <a
-                                            href={SOURCES[heading][1]}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="ml-3 opacity-60 underline-offset-[5px] hover:underline"
-                                        >
-                                            via {SOURCES[heading][0]} ↗
-                                        </a>
-                                    )}
-                                </summary>
-                                <div className="flex flex-col gap-4">
-                                    {groups.map((group, i) => (
-                                        <ul key={i}>
-                                            {group.map((text) => (
-                                                <li key={text}>
-                                                    <InlineMd text={text} />
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    ))}
-                                </div>
-                            </details>
-                        ))}
-                        {links.map((text) => (
-                            <p key={text}>
-                                <InlineMd text={text} />
-                            </p>
-                        ))}
-                    </div>
+                    {/* Headed like "currently", so the two columns read as now and next. */}
+                    <section className="min-w-0 flex-1">
+                        <Label>up next</Label>
+                        <div className="flex flex-col gap-8">
+                            {sections.map(({ heading, groups }) => (
+                                <details key={heading} open className="group">
+                                    <summary className="mb-3 cursor-pointer list-none text-[12px] lowercase tracking-[0.04em] opacity-50 transition-opacity hover:opacity-100 [&::-webkit-details-marker]:hidden">
+                                        <span className="mr-2 inline-block transition-transform group-open:rotate-90">
+                                            ›
+                                        </span>
+                                        {heading}
+                                        <span className="ml-2 tabular-nums opacity-60">{groups.flat().length}</span>
+                                        {SOURCES[heading] && (
+                                            <a
+                                                href={SOURCES[heading][1]}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="ml-3 opacity-60 underline-offset-[5px] hover:underline"
+                                            >
+                                                via {SOURCES[heading][0]} ↗
+                                            </a>
+                                        )}
+                                    </summary>
+                                    <div className="flex flex-col gap-4">
+                                        {groups.map((group, i) => (
+                                            <ul key={i}>
+                                                {group.map((text) => (
+                                                    <li key={text}>
+                                                        <InlineMd text={text} />
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ))}
+                                    </div>
+                                </details>
+                            ))}
+                            {links.map((text) => (
+                                <p key={text}>
+                                    <InlineMd text={text} />
+                                </p>
+                            ))}
+                        </div>
+                    </section>
                 </div>
             </Container>
         </div>
