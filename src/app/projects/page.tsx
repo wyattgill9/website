@@ -174,7 +174,7 @@ const Entry = ({ title, dates, langs, note, metric, bullets }: Project) => (
             {bullets.map((text) => (
                 <li key={text} className="flex gap-3">
                     <span aria-hidden="true" className="select-none opacity-30">
-                        λ
+                        -
                     </span>
                     <span className="text-[color-mix(in_srgb,var(--foreground-color)_70%,transparent)]">
                         <InlineMd text={text} />
