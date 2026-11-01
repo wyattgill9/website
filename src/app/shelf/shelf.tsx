@@ -100,6 +100,58 @@ const Label = ({ children }: { children: ReactNode }) => (
     <h2 className="mb-3 text-[12px] lowercase tracking-[0.04em] opacity-50">{children}</h2>
 );
 
+/** A list longer than FOLD_OVER shows its first SHOWN items, with the rest behind a "+N more". */
+const SHOWN = 10;
+const FOLD_OVER = 15;
+
+/** Split after the first `n` items, keeping shelf.md's blank-line groups on both sides. */
+function fold(groups: string[][], n: number) {
+    const shown: string[][] = [];
+    const rest: string[][] = [];
+    let left = n;
+    for (const group of groups) {
+        if (left >= group.length) shown.push(group);
+        else {
+            if (left > 0) shown.push(group.slice(0, left));
+            rest.push(group.slice(left));
+        }
+        left = Math.max(0, left - group.length);
+    }
+    return [shown, rest];
+}
+
+const Groups = ({ groups }: { groups: string[][] }) =>
+    groups.map((group, i) => (
+        <ul key={i}>
+            {group.map((text) => (
+                <li key={text}>
+                    <InlineMd text={text} />
+                </li>
+            ))}
+        </ul>
+    ));
+
+function Folded({ groups }: { groups: string[][] }) {
+    const total = groups.flat().length;
+    const [shown, rest] = total > FOLD_OVER ? fold(groups, SHOWN) : [groups, []];
+    return (
+        <div className="flex flex-col gap-4">
+            <Groups groups={shown} />
+            {rest.length > 0 && (
+                <details className="group/more">
+                    <summary className="w-fit cursor-pointer list-none text-[12px] lowercase tracking-[0.04em] opacity-50 transition-opacity hover:opacity-100 [&::-webkit-details-marker]:hidden">
+                        <span className="group-open/more:hidden">+{total - SHOWN} more</span>
+                        <span className="hidden group-open/more:inline">show less</span>
+                    </summary>
+                    <div className="mt-4 flex flex-col gap-4">
+                        <Groups groups={rest} />
+                    </div>
+                </details>
+            )}
+        </div>
+    );
+}
+
 /** A currently or favorites title; hovering it shows its cover. */
 const Title = ({ title }: { title: string }) => (
     <span className="whitespace-nowrap">
@@ -229,17 +281,7 @@ export default async function ShelfPage({ secret = false }: { secret?: boolean }
                                             </a>
                                         )}
                                     </summary>
-                                    <div className="flex flex-col gap-4">
-                                        {groups.map((group, i) => (
-                                            <ul key={i}>
-                                                {group.map((text) => (
-                                                    <li key={text}>
-                                                        <InlineMd text={text} />
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        ))}
-                                    </div>
+                                    <Folded groups={groups} />
                                 </details>
                             ))}
                             {links.map((text) => (
