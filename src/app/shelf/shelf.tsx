@@ -37,7 +37,7 @@ function parse(md: string) {
     return { sections, links };
 }
 
-/** Fill the generated sections from their sources; a source that fails leaves its section empty. */
+/** Fill the generated sections from their sources (a source that fails leaves its section empty), then sort every list. */
 async function load() {
     const { sections, links } = parse(readFileSync(path.join(process.cwd(), "src/app/shelf/shelf.md"), "utf8"));
     await Promise.all(
@@ -51,6 +51,8 @@ async function load() {
             }
         })
     );
+    // Every list reads alphabetically; groups split by blank lines stay apart. Items all start with **title**.
+    for (const { groups } of sections) for (const group of groups) group.sort((a, b) => a.localeCompare(b));
     return { sections, links };
 }
 
@@ -71,7 +73,7 @@ const FAVORITES: { label: string; profile?: [string, string]; items: string[] }[
     {
         label: "Film",
         profile: ["letterboxd", "https://letterboxd.com/Wyatt_G/"],
-        items: ["Whiplash", "Inception", "Se7en", "Apocalypse Now"],
+        items: ["Parasite", "No Country for Old Men", "Se7en"],
     },
     { label: "TV", items: ["Chernobyl"] },
     { label: "Game", items: ["NieR: Automata"] },
