@@ -5,7 +5,9 @@ import darlingInTheFranxx from "./darling-in-the-franxx.jpg";
 import fate from "./fate.jpg";
 import monogatari from "./monogatari.jpg";
 import nierAutomata from "./nier-automata.jpg";
+import noCountryForOldMen from "./no-country-for-old-men.jpg";
 import notesFromUnderground from "./notes-from-underground.jpg";
+import parasite from "./parasite.jpg";
 import reZero from "./re-zero.jpg";
 import se7en from "./se7en.jpg";
 import slaughterhouseFive from "./slaughterhouse-five.jpg";
@@ -25,7 +27,9 @@ export const COVERS: Record<string, StaticImageData> = {
     "Fate series": fate,
     Monogatari: monogatari,
     "NieR: Automata": nierAutomata,
+    "No Country for Old Men": noCountryForOldMen,
     "Notes from Underground": notesFromUnderground,
+    Parasite: parasite,
     "Re:Zero": reZero,
     Se7en: se7en,
     "Slaughterhouse-Five": slaughterhouseFive,
