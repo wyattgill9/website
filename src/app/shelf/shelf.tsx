@@ -37,7 +37,10 @@ function parse(md: string) {
     return { sections, links };
 }
 
-/** Fill the generated sections from their sources (a source that fails leaves its section empty), then sort every list. */
+/** shelf.md sections kept in the order they're written. */
+const IN_ORDER = new Set(["Novels", "Math"]);
+
+/** Fill the generated sections from their sources (a source that fails leaves its section empty), then sort the rest. */
 async function load() {
     const { sections, links } = parse(readFileSync(path.join(process.cwd(), "src/app/shelf/shelf.md"), "utf8"));
     await Promise.all(
@@ -51,8 +54,10 @@ async function load() {
             }
         })
     );
-    // Every list reads alphabetically; groups split by blank lines stay apart. Items all start with **title**.
-    for (const { groups } of sections) for (const group of groups) group.sort((a, b) => a.localeCompare(b));
+    // Lists read alphabetically as one run (items all start with **title**), except the ones kept in reading order.
+    for (const section of sections)
+        if (!IN_ORDER.has(section.heading))
+            section.groups = [section.groups.flat().sort((a, b) => a.localeCompare(b))];
     return { sections, links };
 }
 
