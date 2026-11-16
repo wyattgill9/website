@@ -56,8 +56,7 @@ async function load() {
     );
     // Lists read alphabetically as one run (items all start with **title**), except the ones kept in reading order.
     for (const section of sections)
-        if (!IN_ORDER.has(section.heading))
-            section.groups = [section.groups.flat().sort((a, b) => a.localeCompare(b))];
+        if (!IN_ORDER.has(section.heading)) section.groups = [section.groups.flat().sort((a, b) => a.localeCompare(b))];
     return { sections, links };
 }
 
