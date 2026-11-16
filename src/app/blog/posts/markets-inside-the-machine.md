@@ -76,7 +76,7 @@ Beijing is dismantling the system on a deadline. By the end of June 2027 every L
 
 On paper it is working. Finance Minister Lan Fo'an has put hidden debt at RMB 14.3 trillion at the end of 2023 and RMB 10.5 trillion a year later, according to Caixin. An official report on 3 November 2026 said the number of remaining platforms was down 92% from March 2023 by the end of September, and that their operating financial debt was down 79% by the end of June.
 
-Some exits are cosmetic. Chinascope, citing unnamed experts, says some platforms "completed only procedural exits through renaming, mergers, or debt swaps, without developing independent market-based businesses." The exit statistics may overstate how much has really changed.
+Some exits are cosmetic. Chinascope, summarising an Epoch Times report that cites unnamed experts, says some platforms "completed only procedural exits through renaming, mergers, or debt swaps, without developing independent market-based businesses" or sustainable profitability. The exit statistics may overstate how much has really changed.
 
 The clean-up has a cost: lower investment. Bloomberg reported that RMB 1.38 trillion of 2025's RMB 4.4 trillion special-bond quota, about 31%, went to repaying debt, and infrastructure investment fell 2.2% that year. In 2026 the squeeze has spread. Fixed-asset investment fell 8.1% year on year in January–October, with infrastructure down 5.1%, private investment down 11.4% and property investment down 21.6%. Beijing is taking on a bigger share of new government debt: 56% in 2025, up from 48% the year before, by Yicai's reading of the government work report.
 
@@ -90,9 +90,9 @@ The headline deficit of about 4% of GDP covers only the first book. Even there, 
 
 The debt picture works the same way. Local governments borrow officially through two kinds of bonds. General bonds pay for projects that earn no revenue and count in the deficit. Special-purpose bonds pay for projects meant to earn revenue, are repaid from the fund budget and stay out of the headline deficit. This year's quotas are RMB 4.4 trillion of special bonds and RMB 800 billion of general bonds, plus the RMB 2 trillion of refinancing bonds. The IMF puts the official debt ratio at 68.4% of GDP in 2025, rising to 75.1% in 2026.
 
-Outside the official books there is much more. Caixin reports another RMB 14.8 trillion of LGFV "operating" debt that is not classed as hidden government debt but still leaves local governments responsible for repayment. The IMF puts off-budget debt, including LGFVs and government guidance funds, at about RMB 93 trillion in 2025. That gives an augmented public debt of 126.6% of GDP in 2025, heading for 135.3% in 2026.
+Outside the official books there is much more. Caixin reports another RMB 14.8 trillion of LGFV "operating" debt that is not classed as hidden government debt but still leaves local governments responsible for repayment. The IMF puts off-budget debt at about RMB 82 trillion in 2025: roughly RMB 71 trillion of LGFV debt plus about RMB 10 trillion in government guidance funds and special construction funds. That gives an augmented public debt of 126.6% of GDP in 2025, heading for 135.3% in 2026.
 
-Chinese authorities reject this. According to the IMF they "continued to hold an opposing view", arguing that LGFV operating debt should not count. This is a real dispute over definitions, not a settled fact. Depending on where you draw the line between the state and the firms it owns, China's public debt is somewhere between three-quarters of GDP and well over its entire GDP.
+Chinese authorities reject this. According to the IMF they "continued to hold an opposing view", arguing that the operating debt of LGFVs and the debt of government guidance funds and special construction funds should not count as government debt. This is a real dispute over definitions, not a settled fact. Depending on where you draw the line between the state and the firms it owns, China's public debt is somewhere between three-quarters of GDP and well over its entire GDP.
 
 ## Companies with two bosses
 
@@ -176,7 +176,7 @@ Anti-involution is a coordinated campaign on prices and capacity rather than a s
 
 The main targets are solar, batteries and EVs, where the regulator fast-tracked 52 merger reviews in the first half of 2026. Compared with earlier campaigns there are fewer hard capacity-cut quotas, and enforcement relies heavily on industry self-discipline and output curbs.
 
-That approach involves a quiet trade-off. When associations publish cost benchmarks under official guidance, some of the power to set prices moves from firms to associations and the government. The IMF is sceptical. In February 2026 its Executive Board said the strategy "should be clarified further and be accompanied by stronger incentives to reduce overinvestment by local governments", and its staff said it "lacks a clearly communicated primary objective". The worry, in other words, is that the campaign goes after prices while leaving in place the local incentives that drive overinvestment.
+That approach involves a quiet trade-off. When associations publish cost benchmarks under official guidance, some of the power to set prices moves from firms to associations and the government. The IMF is sceptical. In February 2026 its Executive Board said the strategy "should be clarified further and be accompanied by stronger incentives to reduce overinvestment by local governments", and its staff judged that "the scope of the 'anti-involution' campaign in addressing deflationary pressures appears limited". The worry, in other words, is that the campaign goes after prices while leaving in place the local incentives that drive overinvestment.
 
 ### What the market prices, and what it doesn't
 
@@ -190,7 +190,7 @@ Gross national saving was 42.1% of GDP in 2025, according to the IMF. Household 
 
 Three institutions shape how households live and save. The first is _hukou_, the household-registration system. It links access to local public services, including school places, some health and social-insurance benefits and housing eligibility, to the place where a person is registered rather than where they live and work. Migrant workers therefore get thinner coverage and save more as a precaution. Most cities have loosened their settlement rules, but the megacities still ration residency through points systems.
 
-The second is the safety net. Pensions and medical insurance each run on two tracks, one for urban employees and one for other urban and rural residents, and resident pensions pay very little: by one estimate the average rural pension was about $35 a month in 2024. Most of the funds are pooled locally, and they rely on growing fiscal subsidies.
+The second is the safety net. Pensions and medical insurance each run on two tracks, one for urban employees and one for other urban and rural residents, and resident pensions pay very little: the average rural pension was RMB 246 (about $35) a month in 2024. Most of the funds are pooled locally, and they rely on growing fiscal subsidies.
 
 The third is land. Rural households hold contract rights to collective farmland, which can be leased or transferred and in pilot areas mortgaged, and use rights to homestead plots, which generally cannot be sold outside the collective. Ownership stays with the collective, and rural land reaches the market only through government-controlled conversion or limited pilot markets. So rural families' land is hard to sell or borrow against, and turning it into urban land has to go through the local government.
 
