@@ -58,11 +58,13 @@ export default {
                 ":root": {
                     "--background-color": theme("colors.light-background"),
                     "--foreground-color": theme("colors.light-foreground"),
+                    "--accent-color": "#d9480f",
                     "--muted-color": "color-mix(in srgb, var(--foreground-color) 64%, transparent)",
                 },
                 ".dark": {
                     "--background-color": theme("colors.dark-background"),
                     "--foreground-color": theme("colors.dark-foreground"),
+                    "--accent-color": "#ff7a45",
                     "--muted-color": "color-mix(in srgb, var(--foreground-color) 50%, transparent)",
                 },
             });

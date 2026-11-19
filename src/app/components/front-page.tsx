@@ -8,9 +8,9 @@ const SOCIALS = [
     { label: "github", href: "https://github.com/wyattgill9" },
     { label: "linkedin", href: "https://www.linkedin.com/in/wyatt-gill-17380b323/" },
     { label: "x", href: "https://x.com/WyattGill_" },
-    { label: "steam", href: "https://steamcommunity.com/id/rainyzen" },
-    { label: "spotify", href: "https://open.spotify.com/user/31m3ssoq4vnipec7zglk2quiauaq" },
     { label: "email", href: "mailto:wyattgill01@outlook.com" },
+    { label: "spotify", href: "https://open.spotify.com/user/31m3ssoq4vnipec7zglk2quiauaq" },
+    { label: "steam", href: "https://steamcommunity.com/id/rainyzen" },
 ];
 
 const UNDERLINE =
@@ -25,16 +25,6 @@ const QuoteLines = () => (
         <br />
         becomes a dragon
     </>
-);
-
-// The pond and the layout started as Dao Ho's portfolio.
-const Credit = ({ className }: { className?: string }) => (
-    <p className={`text-[12px] opacity-40 ${className ?? ""}`}>
-        based on{" "}
-        <a href="https://daoho.dev" target="_blank" rel="noopener noreferrer" className={UNDERLINE}>
-            daoho.dev
-        </a>
-    </p>
 );
 
 const Socials = ({ className }: { className?: string }) => (
@@ -55,28 +45,29 @@ const Socials = ({ className }: { className?: string }) => (
     </p>
 );
 
-const FrontPage = () => {
+/** `epigraph` sits above the bio: the carp quote by default, or whatever the background experiment narrates. */
+const FrontPage = ({ epigraph = <QuoteLines /> }: { epigraph?: React.ReactNode }) => {
     const { isMobile } = useGlobal();
 
     if (isMobile === null) return null;
-    return isMobile ? mobilePage() : desktopPage();
+    return isMobile ? mobilePage(epigraph) : desktopPage(epigraph);
 };
 
-const desktopPage = () => {
+const desktopPage = (epigraph: React.ReactNode) => {
     return (
         <Container
             as="header"
             className="flex h-full flex-col justify-end gap-10 bg-transparent pb-32 pt-32 text-foreground [@media(max-height:720px)]:gap-6 [@media(max-height:720px)]:pb-12 [@media(max-height:720px)]:pt-20"
         >
-            <motion.blockquote
+            <motion.div
                 data-dragon-avoid
                 className="font-geistMono text-[14px] lowercase leading-relaxed tracking-[0.02em]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.6 }}
                 transition={{ duration: 0.4 }}
             >
-                <QuoteLines />
-            </motion.blockquote>
+                {epigraph}
+            </motion.div>
             <motion.div
                 data-dragon-avoid
                 className="max-w-[54rem] font-geistMono text-[15px] leading-[max(22px,3vh)]"
@@ -97,7 +88,6 @@ const desktopPage = () => {
                     Favorite paper: <Mention source="raft">Raft</Mention>.
                 </p>
                 <Socials className="mt-[1.5vh]" />
-                <Credit className="mt-[1vh]" />
             </motion.div>
         </Container>
     );
@@ -110,22 +100,22 @@ const Mention = ({ source, children }: { source: string; children: React.ReactNo
     </a>
 );
 
-const mobilePage = () => {
+const mobilePage = (epigraph: React.ReactNode) => {
     return (
         // Top padding clears the floating nav pill.
         <Container
             as="header"
             className="flex h-full flex-col justify-end gap-8 bg-transparent pb-12 pt-28 font-geistMono text-foreground [@media(max-height:640px)]:gap-5 [@media(max-height:640px)]:pb-8"
         >
-            <motion.blockquote
+            <motion.div
                 data-dragon-avoid
                 className="text-[13px] lowercase leading-relaxed tracking-[0.02em]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.6 }}
                 transition={{ duration: 0.4 }}
             >
-                <QuoteLines />
-            </motion.blockquote>
+                {epigraph}
+            </motion.div>
             <motion.div
                 data-dragon-avoid
                 className="flex flex-col gap-3 text-[14px] leading-[1.6]"
@@ -146,7 +136,6 @@ const mobilePage = () => {
                     Favorite paper: <Mention source="raft">Raft</Mention>.
                 </p>
                 <Socials className="mt-2" />
-                <Credit className="mt-1" />
             </motion.div>
         </Container>
     );
