@@ -7,5 +7,6 @@ export default defineConfig([
     ...nextVitals,
     ...nextTs,
     prettier,
-    globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+    // public/chinese-state is a built copy of the party-state diagram (npm run export:site in that repo)
+    globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "public/chinese-state/**"]),
 ]);

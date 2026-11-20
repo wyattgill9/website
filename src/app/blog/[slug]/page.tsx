@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Container from "../../components/container";
-import InlineMd from "../../components/inline-md";
+import InlineMd, { LINK } from "../../components/inline-md";
 import TopNav from "../../components/top-nav";
 import { formatDate, loadPost, POSTS } from "../posts";
 
@@ -52,8 +52,25 @@ export default async function Post({ params }: Props) {
                             </p>
                         )}
                     </header>
-                    {post.blocks.map(({ type, text }, i) =>
-                        type === "h2" ? (
+                    {post.blocks.map(({ type, text, src }, i) =>
+                        type === "embed" ? (
+                            // Wider than the text column: the diagram is a wide org chart. On lg the
+                            // container gutter is 20vw, so pull back to a 1.5rem page margin.
+                            <figure key={i} className="my-10 lg:-ml-[calc(20vw-1.5rem)] lg:w-[calc(100vw-3rem)]">
+                                <iframe
+                                    src={src}
+                                    title={text}
+                                    loading="lazy"
+                                    className="h-[80vh] max-h-[900px] min-h-[480px] w-full rounded-md border border-[color-mix(in_srgb,var(--foreground-color)_12%,transparent)]"
+                                />
+                                <figcaption className="mt-2 flex justify-between gap-4 font-geistMono text-[12px] opacity-50">
+                                    <span>{text}</span>
+                                    <a href={src} target="_blank" rel="noopener noreferrer" className={LINK}>
+                                        full screen ↗
+                                    </a>
+                                </figcaption>
+                            </figure>
+                        ) : type === "h2" ? (
                             <h2
                                 key={i}
                                 className="mb-4 mt-14 border-t border-[color-mix(in_srgb,var(--foreground-color)_12%,transparent)] pt-8 font-geistMono text-[15px] font-medium"
