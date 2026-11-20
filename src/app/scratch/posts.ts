@@ -14,7 +14,7 @@ export type Block = { type: "h2" | "h3" | "p" | "hr" | "embed"; text: string; sr
 export function loadPost(slug: string) {
     const post = POSTS.find((p) => p.slug === slug);
     if (!post) return null;
-    const md = readFileSync(path.join(process.cwd(), "src/app/blog/posts", `${slug}.md`), "utf8");
+    const md = readFileSync(path.join(process.cwd(), "src/app/scratch/posts", `${slug}.md`), "utf8");
     let title = "";
     let dek = "";
     const blocks: Block[] = [];

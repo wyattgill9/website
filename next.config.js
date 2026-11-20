@@ -22,6 +22,14 @@ const nextConfig = {
             },
         ];
     },
+    // The AI posts lived under /blog before it was kept for human writing; keep their old links working.
+    async redirects() {
+        return ["making-sense-of-the-chinese-state", "markets-inside-the-machine"].map((slug) => ({
+            source: `/blog/${slug}`,
+            destination: `/scratch/${slug}`,
+            permanent: true,
+        }));
+    },
     skipTrailingSlashRedirect: true,
 };
 

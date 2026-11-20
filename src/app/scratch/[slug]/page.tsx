@@ -31,10 +31,10 @@ export default async function Post({ params }: Props) {
                 <article className="max-w-[68ch] font-geistSans text-[16px] leading-[1.75]">
                     <header className="mb-12 font-geistMono">
                         <Link
-                            href="/blog"
+                            href="/scratch"
                             className="text-[12px] lowercase tracking-[0.04em] opacity-50 transition-opacity hover:opacity-100"
                         >
-                            ← blog
+                            ← scratch
                         </Link>
                         <h1 className="mt-6 text-balance text-[22px] font-medium leading-[1.3]">{post.title}</h1>
                         <time dateTime={post.date} className="mt-3 block text-[12px] tabular-nums opacity-50">
