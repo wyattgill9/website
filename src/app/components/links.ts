@@ -3,5 +3,5 @@ export const LINKS = [
     { label: "fish", href: "/" },
     { label: "projects", href: "/projects" },
     { label: "shelf", href: "/shelf" },
-    { label: "scratch", href: "/scratch" },
+    // { label: "scratch", href: "/scratch" },
 ];

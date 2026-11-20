@@ -4,8 +4,6 @@ import { LINK } from "../components/inline-md";
 import TopNav from "../components/top-nav";
 import { formatDate, loadPost, POSTS } from "./posts";
 
-export const metadata = { title: "Scratch" };
-
 export default function Scratch() {
     const posts = POSTS.map((p) => loadPost(p.slug)!);
     return (
