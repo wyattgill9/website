@@ -53,7 +53,13 @@
 - **Faust** — _Johann Wolfgang von Goethe_ (1808 / 1832)
 - **The Alchemist** — _Paulo Coelho_ (1988)
 - **One Hundred Years of Solitude** — _Gabriel García Márquez_ (1967)
+
+# Nonfiction
+
+- **Breakneck: China's Quest to Engineer the Future** — _Dan Wang_ (2025)
+- **Deng Xiaoping and the Transformation of China** — _Ezra F. Vogel_ (2011)
 - **From Third World to First** — _Lee Kuan Yew_ (2000)
+- **Making China Modern** — _Klaus Mühlhahn_ (2019)
 
 # Math
 
