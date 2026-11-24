@@ -3,8 +3,6 @@
 const MAL = "https://api.myanimelist.net/v2/users/raiinyzen";
 const LETTERBOXD = "https://letterboxd.com";
 const ONGOING = new Set(["currently_airing", "currently_publishing", "on_hiatus"]);
-/** Matches the page's revalidate: lists refresh at most once a day. */
-const DAY = 86400;
 
 type MalNode = {
     title: string;
@@ -17,7 +15,9 @@ type MalNode = {
 };
 
 async function get(url: string, headers: Record<string, string> = {}) {
-    const res = await fetch(url, { headers, next: { revalidate: DAY } });
+    // No fetch-level cache: during an ISR rebuild Next serves stale cached fetches and only refreshes them in the
+    // background, so caching here made every daily rebuild show the previous day's lists. The page's revalidate is the cache.
+    const res = await fetch(url, { headers });
     if (!res.ok) throw new Error(`${res.status} ${url}`);
     return res.text();
 }
